@@ -222,109 +222,147 @@
     <div class="right-panel result-section" id="winner-list"></div>
   </div>
 
-  <script>
-    let currentRound = 1;
-    let prizeList = JSON.parse(localStorage.getItem('prizeList') || '[]');
-    let registData = [];
-    let remaining = [];
-    let drawnNumbers = [];
-    let interval = null;
+<script>
+let currentRound = 1;
+let prizeList = JSON.parse(localStorage.getItem('prizeList') || '[]');
+let registData = [];
+let remaining = [];
+let drawnNumbers = [];
+let interval = null;
 
-    async function loadRegistData() {
-      const res = await fetch(`${SCRIPT_URL}?getRegistList=1`);
-      registData = await res.json();
-      remaining = registData.map((_, i) => i + 1);
-      updateRemaining();
-    }
+const buttons = {
+  draw: document.querySelector('.btn-draw'),
+  freeze: document.querySelector('.btn-freeze'),
+  save: document.querySelector('.btn-save'),
+  undo: document.querySelector('.btn-undo'),
+  next: document.querySelector('.btn-next')
+};
 
-    function updateRemaining() {
-      document.getElementById("remaining-info").innerHTML =
-        `คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน<br>${remaining.join(', ')}`;
-    }
+function setButtonState(state) {
+  Object.values(buttons).forEach(btn => btn.disabled = true);
+  if (state === 'draw') buttons.draw.disabled = false;
+  if (state === 'freeze') buttons.freeze.disabled = false;
+  if (state === 'save') buttons.save.disabled = false;
+  if (state === 'done') {
+    buttons.undo.disabled = false;
+    buttons.next.disabled = false;
+  }
+}
 
-    function renderPrizeTable() {
-      const tbody = document.getElementById("prize-list");
-      tbody.innerHTML = '';
-      prizeList.forEach((row, i) => {
-        tbody.innerHTML += `
-          <tr>
-            <td><input value="${row[0]}" onchange="editPrize(${i},0,this.value)"></td>
-            <td><input value="${row[1]}" onchange="editPrize(${i},1,this.value)"></td>
-            <td><input value="${row[2]}" onchange="editPrize(${i},2,this.value)"></td>
-            <td><input type="checkbox" ${row[3] ? 'checked' : ''} onchange="editPrize(${i},3,this.checked)"></td>
-            <td><button onclick="deletePrize(${i})"><i data-lucide="trash-2"></i></button></td>
-          </tr>
-        `;
-      });
-      lucide.createIcons();
-      updateRoundTitle();
-    }
+async function loadRegistData() {
+  const res = await fetch(`${SCRIPT_URL}?getRegistList=1`);
+  registData = await res.json();
+  remaining = registData.map((_, i) => i + 1);
+  updateRemaining();
+  setButtonState('draw');
+}
 
-    function addPrizeRow() {
-      prizeList.push([currentRound, '', 1, false]);
-      savePrizeList();
-    }
+function updateRemaining() {
+  document.getElementById("remaining-info").innerHTML =
+    `คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน<br>${remaining.join(', ')}`;
+}
 
-    function editPrize(i, col, val) {
-      prizeList[i][col] = col === 3 ? !!val : val;
-      savePrizeList();
-    }
+function renderPrizeTable() {
+  const tbody = document.getElementById("prize-list");
+  tbody.innerHTML = '';
+  prizeList.forEach((row, i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td><input value="${row[0]}" onchange="editPrize(${i},0,this.value)"></td>
+        <td><input value="${row[1]}" onchange="editPrize(${i},1,this.value)"></td>
+        <td><input value="${row[2]}" onchange="editPrize(${i},2,this.value)"></td>
+        <td><input type="checkbox" ${row[3] ? 'checked' : ''} onchange="editPrize(${i},3,this.checked)"></td>
+        <td><button onclick="deletePrize(${i})"><i data-lucide="trash-2"></i></button></td>
+      </tr>
+    `;
+  });
+  lucide.createIcons();
+  updateRoundTitle();
+}
 
-    function deletePrize(i) {
-      if (confirm('ลบรายการนี้?')) {
-        prizeList.splice(i, 1);
-        savePrizeList();
-      }
-    }
+function addPrizeRow() {
+  prizeList.push([currentRound, '', 1, false]);
+  savePrizeList();
+}
 
-    function savePrizeList() {
-      localStorage.setItem('prizeList', JSON.stringify(prizeList));
-      renderPrizeTable();
-    }
+function editPrize(i, col, val) {
+  prizeList[i][col] = col === 3 ? !!val : val;
+  savePrizeList();
+}
 
-    function updateRoundTitle() {
-      const prize = prizeList.find(p => Number(p[0]) === currentRound);
-      const text = prize ? `รอบที่ ${prize[0]} - ${prize[1]}` : `รอบที่ ${currentRound}`;
-      document.getElementById("round-title").innerText = text;
-    }
+function deletePrize(i) {
+  if (confirm('ลบรายการนี้?')) {
+    prizeList.splice(i, 1);
+    savePrizeList();
+  }
+}
 
-    function startRandom() {
-      const count = getPrizeCount();
-      const box = document.getElementById("number-boxes");
-      drawnNumbers = [];
-      box.innerHTML = '';
-      for (let i = 0; i < count; i++) {
-        const el = document.createElement('div');
-        el.className = 'draw-number';
-        el.innerText = '🎲';
-        box.appendChild(el);
-      }
-      interval = setInterval(() => {
-        [...box.children].forEach(el => {
-          const rand = remaining[Math.floor(Math.random() * remaining.length)] || '❌';
-          el.innerText = rand;
-        });
-      }, 100);
-    }
+function savePrizeList() {
+  localStorage.setItem('prizeList', JSON.stringify(prizeList));
+  renderPrizeTable();
+}
 
-    function stopRandom() {
-      if (interval) clearInterval(interval);
-      const count = getPrizeCount();
-      drawnNumbers = [];
-      while (drawnNumbers.length < count && remaining.length > 0) {
-        const rand = remaining[Math.floor(Math.random() * remaining.length)];
-        if (!drawnNumbers.includes(rand)) drawnNumbers.push(rand);
-      }
-      const box = document.getElementById("number-boxes");
-      box.innerHTML = '';
-      drawnNumbers.forEach(num => {
-        const el = document.createElement('div');
-        el.className = 'draw-number';
-        el.innerText = num;
-        el.onclick = () => el.classList.toggle('confirmed');
-        box.appendChild(el);
-      });
+function updateRoundTitle() {
+  const prize = prizeList.find(p => Number(p[0]) === currentRound);
+  const text = prize ? `รอบที่ ${prize[0]} - ${prize[1]}` : `รอบที่ ${currentRound}`;
+  document.getElementById("round-title").innerText = text;
+}
+
+function startRandom() {
+  const prize = prizeList.find(p => Number(p[0]) === currentRound);
+  if (!prize) return;
+  const count = Number(prize[2]);
+  drawnNumbers = [];
+
+  const box = document.getElementById("number-boxes");
+  box.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'draw-number';
+    el.innerText = '🎲';
+    box.appendChild(el);
+  }
+
+  interval = setInterval(() => {
+    [...box.children].forEach(el => {
+      const rand = remaining[Math.floor(Math.random() * remaining.length)] || '❌';
+      el.innerText = rand;
+    });
+  }, 100);
+  setButtonState('freeze');
+}
+
+function stopRandom() {
+  if (interval) clearInterval(interval);
+  const prize = prizeList.find(p => Number(p[0]) === currentRound);
+  if (!prize) return;
+
+  const count = Number(prize[2]);
+  const confirmMode = prize[3];
+
+  const box = document.getElementById("number-boxes");
+  const existingConfirmed = [...box.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
+  const newDraw = [...existingConfirmed];
+
+  while (newDraw.length < count && remaining.length > 0) {
+    const rand = remaining[Math.floor(Math.random() * remaining.length)];
+    if (!newDraw.includes(rand)) newDraw.push(rand);
+  }
+
+  drawnNumbers = newDraw;
+
+  box.innerHTML = '';
+  drawnNumbers.forEach(num => {
+    const el = document.createElement('div');
+    el.className = 'draw-number';
+    el.innerText = num;
+    if (confirmMode) {
+      el.onclick = () => el.classList.toggle('confirmed');
     }
+    box.appendChild(el);
+  });
+  setButtonState('save');
+}
 
 function saveResult() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
@@ -332,24 +370,25 @@ function saveResult() {
   const confirmed = [...document.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
   const toSave = confirmMode ? confirmed : drawnNumbers;
 
-  if (toSave.length === 0) return alert("ยังไม่ได้เลือกหมายเลข");
+  if (toSave.length < Number(prize[2])) {
+    alert(`ยังเลือกไม่ครบจำนวน (${toSave.length}/${prize[2]})`);
+    startRandom();
+    return;
+  }
 
   const callbackName = `jsonpCallback_${Date.now()}`;
-  console.log("📤 ส่งข้อมูล saveResult:", { round: prize[0], prize: prize[1], numbers: toSave, callback: callbackName });
-
   window[callbackName] = function(response) {
-    console.log("✅ บันทึกเสร็จ:", response);
     alert("✅ บันทึกสำเร็จ");
-    remaining = remaining.filter(n => !drawnNumbers.includes(n));
+    remaining = remaining.filter(n => !toSave.includes(n));
     updateRemaining();
     renderWinners();
+    setButtonState('done');
     delete window[callbackName];
   };
 
   const url = `${SCRIPT_URL}?saveResult=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&callback=${callbackName}`;
   const script = document.createElement('script');
   script.src = url;
-  script.onerror = () => console.error("❌ บันทึกไม่สำเร็จ");
   document.body.appendChild(script);
 }
 
@@ -393,38 +432,42 @@ function renderWinners() {
   document.body.appendChild(script);
 }
 
-    function getPrizeCount() {
-      const prize = prizeList.find(p => Number(p[0]) === currentRound);
-      return prize ? Number(prize[2]) : 1;
-    }
+function getPrizeCount() {
+  const prize = prizeList.find(p => Number(p[0]) === currentRound);
+  return prize ? Number(prize[2]) : 1;
+}
 
-    function undoLast() {
-      fetch(`${SCRIPT_URL}?undoDraw=1&round=${currentRound}`).then(() => {
-        alert("❌ ยกเลิกรอบล่าสุดแล้ว");
-        loadRegistData();
-        renderWinners();
-      });
-    }
+function undoLast() {
+  fetch(`${SCRIPT_URL}?undoDraw=1&round=${currentRound}`).then(() => {
+    alert("❌ ยกเลิกรอบล่าสุดแล้ว");
+    loadRegistData();
+    renderWinners();
+    setButtonState('draw');
+  });
+}
 
-    function nextRound() {
-      currentRound++;
-      updateRoundTitle();
-      document.getElementById("number-boxes").innerHTML = '';
-    }
+function nextRound() {
+  const prize = prizeList.find(p => Number(p[0]) === currentRound);
+  if (!prize) return alert("กรุณาเลือกแถวรางวัลก่อน");
+  currentRound = Number(prize[0]);
+  updateRoundTitle();
+  document.getElementById("number-boxes").innerHTML = '';
+  setButtonState('draw');
+}
 
-    function resetAll() {
-      if (confirm("⚠️ ต้องการรีเซ็ตระบบจับรางวัลทั้งหมดใช่หรือไม่?")) {
-        localStorage.removeItem('prizeList');
-        location.reload();
-      }
-    }
+function resetAll() {
+  if (confirm("⚠️ ต้องการรีเซ็ตระบบจับรางวัลทั้งหมดใช่หรือไม่?")) {
+    localStorage.removeItem('prizeList');
+    location.reload();
+  }
+}
 
-    window.addEventListener("DOMContentLoaded", () => {
-      renderPrizeTable();
-      loadRegistData();
-      renderWinners();
-      lucide.createIcons();
-    });
-  </script>
+window.addEventListener("DOMContentLoaded", () => {
+  renderPrizeTable();
+  loadRegistData();
+  renderWinners();
+  lucide.createIcons();
+});
+</script>
 </body>
 </html>
