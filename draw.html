@@ -240,14 +240,22 @@ const buttons = {
 
 function setButtonState(state) {
   Object.values(buttons).forEach(btn => btn.disabled = true);
-  if (state === 'draw') {
-    buttons.draw.disabled = false;
-    buttons.freeze.disabled = false;
-    buttons.save.disabled = false;
-  }
-  if (state === 'done') {
-    buttons.undo.disabled = false;
-    buttons.next.disabled = false;
+  switch (state) {
+    case 'draw':
+      buttons.draw.disabled = false;
+      buttons.freeze.disabled = false;
+      buttons.save.disabled = false;
+      break;
+    case 'freeze':
+      buttons.freeze.disabled = false;
+      break;
+    case 'save':
+      buttons.save.disabled = false;
+      break;
+    case 'done':
+      buttons.undo.disabled = false;
+      buttons.next.disabled = false;
+      break;
   }
 }
 
