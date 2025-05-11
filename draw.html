@@ -270,7 +270,7 @@ async function loadRegistData() {
 
 function updateRemaining() {
   document.getElementById("remaining-info").innerHTML =
-    `\u0e04\u0e07\u0e40\u0e2b\u0e25\u0e37\u0e2d\u0e1c\u0e39\u0e49\u0e25\u0e07\u0e17\u0e30\u0e40\u0e40\u0e1a\u0e35\u0e22\u0e19 \u0e08\u0e33\u0e19\u0e27\u0e19 ${remaining.length} \u0e04\u0e19<br>${remaining.join(', ')}`;
+    `คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน<br>${remaining.join(', ')}`;
 }
 
 function renderPrizeTable() {
@@ -351,55 +351,27 @@ function stopRandom() {
   const count = Number(prize[2]);
   const confirmMode = prize[3];
   const box = document.getElementById("number-boxes");
+  const confirmed = [...box.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
 
-  drawnNumbers = [];
-  while (drawnNumbers.length < count && remaining.length > 0) {
+  const newDraw = [...confirmed];
+  while (newDraw.length < count && remaining.length > 0) {
     const rand = remaining[Math.floor(Math.random() * remaining.length)];
-    if (!drawnNumbers.includes(rand)) drawnNumbers.push(rand);
+    if (!newDraw.includes(rand)) newDraw.push(rand);
   }
 
+  drawnNumbers = newDraw;
   box.innerHTML = '';
   drawnNumbers.forEach(num => {
     const el = document.createElement('div');
     el.className = 'draw-number';
     el.innerText = num;
-    if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
+    if (confirmMode) {
+      el.onclick = () => el.classList.toggle('confirmed');
+      if (confirmed.includes(num)) el.classList.add('confirmed');
+    }
     box.appendChild(el);
   });
-
-  if (confirmMode) setButtonState('save');
-  else setButtonState('draw');
-}
-
-function refillUnconfirmedBoxes() {
-  const prize = prizeList.find(p => Number(p[0]) === currentRound);
-  if (!prize) return;
-  const count = Number(prize[2]);
-  const confirmed = [];
-  const box = document.getElementById("number-boxes");
-
-  [...box.children].forEach(el => {
-    const num = Number(el.innerText);
-    if (el.classList.contains('confirmed')) confirmed.push(num);
-    else remaining = remaining.filter(n => n !== num);
-  });
-
-  while (confirmed.length < count && remaining.length > 0) {
-    const rand = remaining[Math.floor(Math.random() * remaining.length)];
-    if (!confirmed.includes(rand)) confirmed.push(rand);
-  }
-
-  drawnNumbers = confirmed;
-  box.innerHTML = '';
-  confirmed.forEach(num => {
-    const el = document.createElement('div');
-    el.className = 'draw-number';
-    el.innerText = num;
-    el.classList.add('confirmed');
-    el.onclick = () => el.classList.toggle('confirmed');
-    box.appendChild(el);
-  });
-  setButtonState('save');
+  setButtonState('draw');
 }
 
 function saveResult() {
@@ -410,7 +382,16 @@ function saveResult() {
 
   if (toSave.length < Number(prize[2])) {
     alert(`ยังเลือกไม่ครบจำนวน (${toSave.length}/${prize[2]})`);
-    if (confirmMode) refillUnconfirmedBoxes();
+    if (confirmMode) {
+      const box = document.getElementById("number-boxes");
+      [...box.children].forEach(el => {
+        const num = Number(el.innerText);
+        if (!el.classList.contains('confirmed')) {
+          remaining = remaining.filter(n => n !== num);
+        }
+      });
+      stopRandom();
+    }
     return;
   }
 
