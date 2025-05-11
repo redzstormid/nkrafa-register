@@ -355,32 +355,35 @@ function saveResult() {
 
 function renderWinners() {
   const callbackName = `renderCallback_${Date.now()}`;
-  
-  // ✅ debug: log ไว้ดูว่า callback ถูกสร้างจริง
+
   console.log("📡 สร้าง callback สำหรับ draw result:", callbackName);
 
   window[callbackName] = function(data) {
     console.log("🎯 ได้ข้อมูล drawprize:", data);
 
-    const group = {};
+    const group = {};  // round => { prize, list: [ ... ] }
 
     data.forEach(([timestamp, round, prize, no, rtafId, rank, name, position, unit]) => {
-      if (!group[round]) group[round] = [];
-      group[round].push(`🔢 ${no} – ${rank} ${name}<br>📌 ${position} (${unit})<br>🎁 ${prize}`);
+      if (!group[round]) {
+        group[round] = { prize: prize, list: [] };
+      }
+      group[round].list.push({ no, rank, name, unit });
     });
 
-    const sortedRounds = Object.keys(group).sort((a, b) => b - a);
+    const sortedRounds = Object.keys(group).sort((a, b) => b - a); // แสดงรอบล่าสุดก่อน
     const container = document.getElementById("winner-list");
     container.innerHTML = '';
 
     for (const round of sortedRounds) {
+      const { prize, list } = group[round];
+
       container.innerHTML += `
-        <h3>ผู้ได้รับรางวัล รอบที่ ${round}</h3>
-        <ol>${group[round].map(detail => `<li style="margin-bottom:8px;">${detail}</li>`).join('')}</ol>
+        <h3>ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}</h3>
+        ${list.map(w => `📌 ${w.no} – ${w.rank} ${w.name} (${w.unit})`).join('<br>')}
+        <br><br>
       `;
     }
 
-    // ✅ ลบ callback ป้องกัน memory leak
     delete window[callbackName];
   };
 
