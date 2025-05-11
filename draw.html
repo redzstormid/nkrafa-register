@@ -326,42 +326,51 @@
       });
     }
 
-    async function saveResult() {
-      const prize = prizeList.find(p => Number(p[0]) === currentRound);
-      const confirmMode = prize[3];
-      const confirmed = [...document.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
-      const toSave = confirmMode ? confirmed : drawnNumbers;
-      if (toSave.length === 0) return alert("ยังไม่ได้เลือกหมายเลข");
+async function saveResult() {
+  const prize = prizeList.find(p => Number(p[0]) === currentRound);
+  const confirmMode = prize[3];
+  const confirmed = [...document.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
+  const toSave = confirmMode ? confirmed : drawnNumbers;
 
-      await fetch(SCRIPT_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'saveDrawResult', round: prize[0], prize: prize[1], numbers: toSave }),
-        headers: { 'Content-Type': 'application/json' }
-      });
+  if (toSave.length === 0) return alert("ยังไม่ได้เลือกหมายเลข");
 
-      remaining = remaining.filter(n => !toSave.includes(n));
-      updateRemaining();
-      renderWinners();
-    }
+  await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'saveDrawResult',
+      round: prize[0],
+      prize: prize[1],
+      numbers: toSave
+    }),
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+  // ✅ ลบทุกหมายเลขที่สุ่มได้ (ไม่ว่าจะยืนยันหรือไม่)
+  remaining = remaining.filter(n => !drawnNumbers.includes(n));
+
+  updateRemaining();
+  renderWinners();
+}
 
 async function renderWinners() {
   const res = await fetch(`${SCRIPT_URL}?getDrawResult=1`);
-  const data = await res.json(); // [[round, prize, num, RTAF_ID, name], ...]
+  const data = await res.json(); // [Timestamp, Round, Prize, Regist_No, RTAF_ID, Rank, Name, Position, Unit]
 
   const group = {};
-  data.forEach(([round, prize, num, , name]) => {
+
+  data.forEach(([timestamp, round, prize, no, rtafId, rank, name, position, unit]) => {
     if (!group[round]) group[round] = [];
-    group[round].push(`${num}. ${name}`);
+    group[round].push(`🔢 ${no} – ${rank} ${name}<br>📌 ${position} (${unit})<br>🎁 ${prize}`);
   });
 
-  const sortedRounds = Object.keys(group).sort((a, b) => b - a); // เรียงรอบจากมากไปน้อย
+  const sortedRounds = Object.keys(group).sort((a, b) => b - a);
   const container = document.getElementById("winner-list");
   container.innerHTML = '';
 
   for (const round of sortedRounds) {
     container.innerHTML += `
       <h3>ผู้ได้รับรางวัล รอบที่ ${round}</h3>
-      <ol>${group[round].map(n => `<li>${n}</li>`).join('')}</ol>
+      <ol>${group[round].map(detail => `<li style="margin-bottom:8px;">${detail}</li>`).join('')}</ol>
     `;
   }
 }
