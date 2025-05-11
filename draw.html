@@ -335,24 +335,33 @@ function saveResult() {
   if (toSave.length === 0) return alert("ยังไม่ได้เลือกหมายเลข");
 
   const callbackName = `jsonpCallback_${Date.now()}`;
+  console.log("📤 ส่งข้อมูล saveResult:", { round: prize[0], prize: prize[1], numbers: toSave, callback: callbackName });
+
   window[callbackName] = function(response) {
-  console.log("✅ ได้ callback:", response);
-  alert("✅ บันทึกสำเร็จ");
-  remaining = remaining.filter(n => !drawnNumbers.includes(n));
-  updateRemaining();
-  renderWinners();
-  delete window[callbackName];
+    console.log("✅ บันทึกเสร็จ:", response);
+    alert("✅ บันทึกสำเร็จ");
+    remaining = remaining.filter(n => !drawnNumbers.includes(n));
+    updateRemaining();
+    renderWinners();
+    delete window[callbackName];
   };
 
   const url = `${SCRIPT_URL}?saveResult=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&callback=${callbackName}`;
   const script = document.createElement('script');
   script.src = url;
+  script.onerror = () => console.error("❌ บันทึกไม่สำเร็จ");
   document.body.appendChild(script);
 }
 
 function renderWinners() {
   const callbackName = `renderCallback_${Date.now()}`;
+  
+  // ✅ debug: log ไว้ดูว่า callback ถูกสร้างจริง
+  console.log("📡 สร้าง callback สำหรับ draw result:", callbackName);
+
   window[callbackName] = function(data) {
+    console.log("🎯 ได้ข้อมูล drawprize:", data);
+
     const group = {};
 
     data.forEach(([timestamp, round, prize, no, rtafId, rank, name, position, unit]) => {
@@ -371,11 +380,13 @@ function renderWinners() {
       `;
     }
 
+    // ✅ ลบ callback ป้องกัน memory leak
     delete window[callbackName];
   };
 
   const script = document.createElement('script');
   script.src = `${SCRIPT_URL}?getDrawResult=1&callback=${callbackName}`;
+  script.onerror = () => console.error("❌ โหลดผลการจับรางวัลไม่สำเร็จ");
   document.body.appendChild(script);
 }
 
