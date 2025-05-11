@@ -326,7 +326,7 @@
       });
     }
 
-async function saveResult() {
+function saveResult() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
   const confirmMode = prize[3];
   const confirmed = [...document.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
@@ -334,22 +334,19 @@ async function saveResult() {
 
   if (toSave.length === 0) return alert("ยังไม่ได้เลือกหมายเลข");
 
-  await fetch(SCRIPT_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'saveDrawResult',
-      round: prize[0],
-      prize: prize[1],
-      numbers: toSave
-    }),
-    headers: { 'Content-Type': 'application/json' }
-  });
+  const callbackName = `jsonpCallback_${Date.now()}`;
+  window[callbackName] = function(response) {
+    alert("✅ บันทึกสำเร็จ");
+    remaining = remaining.filter(n => !drawnNumbers.includes(n));
+    updateRemaining();
+    renderWinners();
+    delete window[callbackName];
+  };
 
-  // ✅ ลบทุกหมายเลขที่สุ่มได้ (ไม่ว่าจะยืนยันหรือไม่)
-  remaining = remaining.filter(n => !drawnNumbers.includes(n));
-
-  updateRemaining();
-  renderWinners();
+  const url = `${SCRIPT_URL}?saveResult=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&callback=${callbackName}`;
+  const script = document.createElement('script');
+  script.src = url;
+  document.body.appendChild(script);
 }
 
 async function renderWinners() {
