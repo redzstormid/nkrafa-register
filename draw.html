@@ -349,27 +349,33 @@ function saveResult() {
   document.body.appendChild(script);
 }
 
-async function renderWinners() {
-  const res = await fetch(`${SCRIPT_URL}?getDrawResult=1`);
-  const data = await res.json(); // [Timestamp, Round, Prize, Regist_No, RTAF_ID, Rank, Name, Position, Unit]
+function renderWinners() {
+  const callbackName = `renderCallback_${Date.now()}`;
+  window[callbackName] = function(data) {
+    const group = {};
 
-  const group = {};
+    data.forEach(([timestamp, round, prize, no, rtafId, rank, name, position, unit]) => {
+      if (!group[round]) group[round] = [];
+      group[round].push(`🔢 ${no} – ${rank} ${name}<br>📌 ${position} (${unit})<br>🎁 ${prize}`);
+    });
 
-  data.forEach(([timestamp, round, prize, no, rtafId, rank, name, position, unit]) => {
-    if (!group[round]) group[round] = [];
-    group[round].push(`🔢 ${no} – ${rank} ${name}<br>📌 ${position} (${unit})<br>🎁 ${prize}`);
-  });
+    const sortedRounds = Object.keys(group).sort((a, b) => b - a);
+    const container = document.getElementById("winner-list");
+    container.innerHTML = '';
 
-  const sortedRounds = Object.keys(group).sort((a, b) => b - a);
-  const container = document.getElementById("winner-list");
-  container.innerHTML = '';
+    for (const round of sortedRounds) {
+      container.innerHTML += `
+        <h3>ผู้ได้รับรางวัล รอบที่ ${round}</h3>
+        <ol>${group[round].map(detail => `<li style="margin-bottom:8px;">${detail}</li>`).join('')}</ol>
+      `;
+    }
 
-  for (const round of sortedRounds) {
-    container.innerHTML += `
-      <h3>ผู้ได้รับรางวัล รอบที่ ${round}</h3>
-      <ol>${group[round].map(detail => `<li style="margin-bottom:8px;">${detail}</li>`).join('')}</ol>
-    `;
-  }
+    delete window[callbackName];
+  };
+
+  const script = document.createElement('script');
+  script.src = `${SCRIPT_URL}?getDrawResult=1&callback=${callbackName}`;
+  document.body.appendChild(script);
 }
 
     function getPrizeCount() {
