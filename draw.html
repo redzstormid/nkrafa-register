@@ -336,11 +336,12 @@ function saveResult() {
 
   const callbackName = `jsonpCallback_${Date.now()}`;
   window[callbackName] = function(response) {
-    alert("✅ บันทึกสำเร็จ");
-    remaining = remaining.filter(n => !drawnNumbers.includes(n));
-    updateRemaining();
-    renderWinners();
-    delete window[callbackName];
+  console.log("✅ ได้ callback:", response);
+  alert("✅ บันทึกสำเร็จ");
+  remaining = remaining.filter(n => !drawnNumbers.includes(n));
+  updateRemaining();
+  renderWinners();
+  delete window[callbackName];
   };
 
   const url = `${SCRIPT_URL}?saveResult=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&callback=${callbackName}`;
