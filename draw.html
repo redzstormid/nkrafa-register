@@ -447,9 +447,14 @@ function undoLast() {
 }
 
 function nextRound() {
-  const prize = prizeList.find(p => Number(p[0]) === currentRound);
-  if (!prize) return alert("กรุณาเลือกแถวรางวัลก่อน");
-  currentRound = Number(prize[0]);
+  const currentIndex = prizeList.findIndex(p => Number(p[0]) === currentRound);
+  if (currentIndex === -1 || currentIndex + 1 >= prizeList.length) {
+    alert("❌ ไม่มีรอบถัดไป");
+    return;
+  }
+
+  const next = prizeList[currentIndex + 1];
+  currentRound = Number(next[0]);
   updateRoundTitle();
   document.getElementById("number-boxes").innerHTML = '';
   setButtonState('draw');
