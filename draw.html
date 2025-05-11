@@ -24,7 +24,7 @@
       margin-right: 10px;
     }
     header h1 {
-      font-size: 26px;
+      font-size: 32px;
       font-weight: bold;
     }
 
@@ -34,12 +34,15 @@
       gap: 20px;
     }
 
-    .left-panel, .center-panel, .right-panel {
+    .left-panel {
+      flex: 0 0 30%;
+    }
+
+    .center-panel, .right-panel {
       flex-grow: 1;
       min-width: 280px;
     }
 
-    /* ตารางรางวัล */
     .prize-table {
       width: 100%;
       border-collapse: collapse;
@@ -69,15 +72,20 @@
 
     .add-prize-btn {
       margin-top: 10px;
-      padding: 8px 12px;
+      padding: 10px 12px;
       font-size: 14px;
       background: #f1f1f1;
       border: 1px dashed #aaa;
       border-radius: 6px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    /* ปุ่มฟังก์ชัน */
     .buttons {
       display: flex;
       justify-content: center;
@@ -169,11 +177,15 @@
       right: 20px;
       background: red;
       color: white;
-      padding: 10px 14px;
+      padding: 10px 16px;
       font-weight: bold;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
   </style>
 </head>
@@ -203,7 +215,9 @@
           <!-- เติมโดย JS -->
         </tbody>
       </table>
-      <button class="add-prize-btn" onclick="addPrizeRow()"><i data-lucide="plus-circle"></i> เพิ่มรางวัล</button>
+      <button class="add-prize-btn" onclick="addPrizeRow()">
+        <i data-lucide="plus-circle"></i> เพิ่มรางวัล
+      </button>
     </div>
 
     <!-- โซนสุ่มรางวัล -->
@@ -247,4 +261,3 @@
   </script>
 </body>
 </html>
-
