@@ -351,16 +351,30 @@ function stopRandom() {
   const confirmMode = prize[3];
 
   const box = document.getElementById("number-boxes");
-  const existingConfirmed = [...box.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
-  const newDraw = [...existingConfirmed];
+  const confirmed = [];
+  const newBox = [];
 
-  while (newDraw.length < count && remaining.length > 0) {
+  // คัดเลขที่ยืนยันไว้
+  [...box.children].forEach(el => {
+    const num = Number(el.innerText);
+    if (el.classList.contains('confirmed')) {
+      confirmed.push(num);
+      newBox.push(num);
+    } else {
+      // เลขที่ไม่เลือก -> ตัดออกจาก remaining
+      remaining = remaining.filter(n => n !== num);
+    }
+  });
+
+  // สุ่มใหม่เฉพาะจำนวนที่เหลือ
+  while (newBox.length < count && remaining.length > 0) {
     const rand = remaining[Math.floor(Math.random() * remaining.length)];
-    if (!newDraw.includes(rand)) newDraw.push(rand);
+    if (!newBox.includes(rand)) newBox.push(rand);
   }
 
-  drawnNumbers = newDraw;
+  drawnNumbers = newBox;
 
+  // แสดงผลใหม่
   box.innerHTML = '';
   drawnNumbers.forEach(num => {
     const el = document.createElement('div');
@@ -368,9 +382,11 @@ function stopRandom() {
     el.innerText = num;
     if (confirmMode) {
       el.onclick = () => el.classList.toggle('confirmed');
+      if (confirmed.includes(num)) el.classList.add('confirmed');
     }
     box.appendChild(el);
   });
+
   setButtonState('save');
 }
 
