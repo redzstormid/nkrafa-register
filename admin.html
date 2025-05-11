@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="./config.js"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Thai', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #3498db;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+    header h1 {
+      font-size: 1.5em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+    }
+    .tab-bar {
+      background: #f2f2f2;
+      display: flex;
+      padding: 0 20px;
+      gap: 10px;
+    }
+    .tab {
+      padding: 10px 16px;
+      background: white;
+      border: 1px solid #ccc;
+      border-bottom: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tab.active {
+      background: #fff;
+      border-bottom: 2px solid #3498db;
+      color: #3498db;
+    }
+    .top-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px 0;
+      flex-wrap: wrap;
+    }
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-grow: 1;
+      max-width: 30%;
+    }
+    .filters input[type="text"], .filters select {
+      font-family: 'Noto Sans Thai', sans-serif;
+      padding: 8px 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn {
+      border: none;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 5px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .btn-reset { background: #f39c12; }
+    .btn-logout { background: #e74c3c; }
+    .btn-add { background: #2ecc71; white-space: nowrap; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+      font-size: 15px;
+    }
+    th {
+      background: #dceeff;
+      font-weight: bold;
+    }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      display: flex; /* สำคัญมาก */
+    }
+    #overlay .overlay-box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px 40px;
+      border-radius: 12px;
+      font-size: 24px;
+      font-weight: bold;
+      font-family: 'Noto Sans Thai', sans-serif;
+      color: #000;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+  .sortable-list {
+    list-style: none;
+    padding: 10px;
+    margin: 20px auto;
+    width: 30%;
+    border-radius: 10px;
+  }
+  .sortable-list li {
+    padding: 12px 18px;
+    background: #ffffff;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .sortable-list li:hover {
+    background: #f0f4ff;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+  .sortable-list li span::before {
+    content: '\2195'; /* ลูกศรขึ้นลง */
+    font-size: 16px;
+    margin-right: 8px;
+    color: #999;
+  }
+    .tab-content { padding: 0 20px; }
+    .hidden { display: none; }
+    .checkbox-cell input { transform: scale(1.2); }
+  </style>
+</head>
+<body>
+  <div id="overlay" data-mode="" style="display: none;">
+    <div class="overlay-box">⏳ กำลังโหลดข้อมูล...</div>
+  </div>
+  <header>
+    <h1><i data-lucide="settings"></i> Admin Panel</h1>
+    <div class="action-buttons">
+      <button class="btn btn-reset" onclick="resetSheet('tokens')"><i data-lucide="rotate-ccw"></i> รีเซ็ต Tokens</button>
+      <button class="btn btn-reset" onclick="resetSheet('regist')"><i data-lucide="rotate-ccw"></i> รีเซ็ตการลงทะเบียน</button>
+      <button class="btn btn-reset" onclick="resetDrawerColumn()"><i data-lucide="rotate-ccw"></i> รีเซ็ตสิทธิ์ผู้จับรางวัล</button>
+      <button class="btn btn-logout" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
+    </div>
+  </header>
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="showTab('personnel-tab')">ข้อมูลกำลังพล</div>
+    <div class="tab" onclick="showTab('rank-tab')">จัดการยศ</div>
+    <div class="tab" onclick="showTab('unit-tab')">จัดการหน่วย</div>
+  </div>
+
+  <div class="tab-content" id="personnel-tab">
+    <div class="top-controls">
+      <div class="filters">
+        <input id="searchInput" type="text" placeholder="🔍 ค้นหา...">
+        <select id="unitFilter"></select>
+      </div>
+      <button class="btn btn-add" onclick="addNewRow()"><i data-lucide="plus"></i> เพิ่มรายชื่อ</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:10%">เลขประจำตัว</th>
+          <th style="width:8%">ยศ</th>
+          <th style="width:20%">ชื่อ</th>
+          <th style="width:20%">ตำแหน่ง</th>
+          <th style="width:10%">หน่วย</th>
+          <th style="width:10%">แก้ไข/ลบ</th>
+          <th style="width:8%">สถานะผูกบัญชีไลน์</th>
+          <th style="width:8%">ส่งชื่อร่วมงาน <input type="checkbox" id="checkAllList" onchange="toggleAllList(this)">
+          </th>
+          <th style="width:8%">ผู้จับรางวัล</th>
+        </tr>
+      </thead>
+      <tbody id="data-table-body"></tbody>
+    </table>
+  </div>
+
+  <div class="tab-content hidden" id="rank-tab">
+    <div class="top-controls">
+      <h3>จัดการยศ</h3>
+      <button class="btn btn-add" onclick="addRank()">
+        <i data-lucide="plus"></i> เพิ่มยศ
+      </button>
+    </div>
+    <ul id="rankList" class="sortable-list"></ul>
+  </div>
+
+  <div class="tab-content hidden" id="unit-tab">
+    <div class="top-controls">
+      <h3>จัดการหน่วย</h3>
+      <button class="btn btn-add" onclick="addUnit()">
+        <i data-lucide="plus"></i> เพิ่มหน่วย
+      </button>
+    </div>
+    <ul id="unitList" class="sortable-list"></ul>
+  </div>
+
+<script>
+let personnelData = [];
+let unitList = [];
+let unitListRaw = [];
+let rankList = [];
+let rankListRaw = [];
+let visibleRows = [];
+
+async function initLiffAndCheckAdmin() {
+  await liff.init({ liffId: LIFF_ID_ADMIN });
+  if (!liff.isLoggedIn()) {
+    liff.login({ redirectUri: window.location.href });
+    return;
+  }
+  const profile = await liff.getProfile();
+  const userId = profile.userId;
+  const res = await fetch(`${SCRIPT_URL}?checkAdmin=true&userId=${userId}`);
+  const isAdmin = await res.text();
+
+  if (isAdmin !== 'true') {
+    document.body.innerHTML = '<h2 style="text-align:center; color:red; padding:50px;">⛔ คุณไม่มีสิทธิ์เข้าใช้งาน</h2>';
+    return;
+  }
+
+  await loadUnitList();
+  await loadRankList();
+  loadPersonnelData();
+}
+
+function logout() {
+  if (liff.isLoggedIn()) {
+    liff.logout();
+    location.reload();
+  }
+}
+
+function showTab(tabId) {
+  const tabs = document.querySelectorAll('.tab');
+  const contents = document.querySelectorAll('.tab-content');
+
+  tabs.forEach(tab => tab.classList.remove('active'));
+  contents.forEach(content => content.classList.add('hidden'));
+
+  document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
+  document.getElementById(tabId).classList.remove('hidden');
+}
+
+async function loadUnitList() {
+  const res = await fetch(`${SCRIPT_URL}?getUnitList=1`);
+  const list = await res.json();
+  unitList = list.map(row => row[1]);
+  unitListRaw = list;
+  renderList('unit', list);  // ✅ ต้องมีบรรทัดนี้
+}
+
+async function loadRankList() {
+  const res = await fetch(`${SCRIPT_URL}?getRankList=1`);
+  const list = await res.json();
+  rankList = list.map(row => row[1]);
+  rankListRaw = list;
+  renderList('rank', list);  // ✅ ต้องมีบรรทัดนี้
+}
+
+function showOverlay(mode = "loading") {
+  const overlay = document.getElementById("overlay");
+  const box = overlay.querySelector(".overlay-box");
+  overlay.setAttribute("data-mode", mode);
+  box.innerText = mode === "saving" ? "💾 กำลังบันทึกข้อมูล..." : "⏳ กำลังโหลดข้อมูล...";
+  overlay.style.display = "flex";
+}
+
+function hideOverlay() {
+  const overlay = document.getElementById("overlay");
+  overlay.style.display = "none";
+  overlay.setAttribute("data-mode", "");
+}
+
+async function loadPersonnelData() {
+  showOverlay("loading");
+  const res = await fetch(`${SCRIPT_URL}?getPersonnel=1`);
+  const data = await res.json();
+  personnelData = data;
+  renderPersonnelTable(data);
+}
+  
+function renderPersonnelTable(data) {
+  const tbody = document.getElementById('data-table-body');
+  tbody.innerHTML = '';
+
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const unitFilter = document.getElementById('unitFilter').value;
+  const units = unitList.length ? unitList : [...new Set(data.map(row => row.unit))].sort();
+  document.getElementById('unitFilter').innerHTML = '<option value="">แสดงทุกหน่วย</option>' + units.map(u => `<option value="${u}">${u}</option>`).join('');
+  document.getElementById('unitFilter').value = unitFilter;
+
+  visibleRows = data.filter(row =>
+    (!unitFilter || row.unit === unitFilter) &&
+    (row.name.toLowerCase().includes(search) || row.rtafId.includes(search))
+  );
+
+  visibleRows.forEach(row => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${row.rtafId}</td>
+      <td>${row.rank}</td>
+      <td>${row.name}</td>
+      <td>${row.position}</td>
+      <td>${row.unit}</td>
+      <td>
+        <div class="flex items-center gap-2">
+          <button onclick="editRow('${row.rtafId}')" class="px-2 py-1 text-white bg-yellow-500 hover:bg-yellow-600 rounded" title="แก้ไข">
+            <i data-lucide="edit"></i>
+          </button>
+          <button onclick="deleteRow('${row.rtafId}')" class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ลบ">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      </td>
+      <td>${row.linked ? '✅' : ''}</td>
+      <td class="checkbox-cell text-center">
+        <input type="checkbox" ${row.list ? 'checked' : ''} data-field="list" data-rtafId="${row.rtafId}"
+          onchange="updateCheckbox('${row.rtafId}', 'list', this.checked)">
+      </td>
+      <td class="checkbox-cell text-center">
+        <input type="checkbox" ${row.drawer ? 'checked' : ''}
+          onchange="updateCheckbox('${row.rtafId}', 'drawer', this.checked)">
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const allChecked = visibleRows.every(row => row.list === true);
+  const master = document.getElementById('checkAllList');
+  if (master) master.checked = allChecked;
+
+  lucide.createIcons();
+  hideOverlay(); // ✅ ปิด overlay ท้ายสุด
+}
+
+function updateCheckbox(rtafId, field, value) {
+  showOverlay("saving");
+
+  fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=${field}&value=${value}`)
+    .then(res => res.text())
+    .then(txt => {
+      console.log('✅ updated', rtafId, field, value);
+      const person = personnelData.find(p => p.rtafId === rtafId);
+      if (person) person[field] = value;
+
+      if (field === 'list') updateCheckAllListStatus();
+    })
+    .catch(err => console.error('❌ error:', err))
+    .finally(() => hideOverlay());
+}
+
+function updateCheckAllListStatus() {
+  const master = document.getElementById('checkAllList');
+  const allChecked = visibleRows.every(row => row.list === true);
+  master.checked = allChecked;
+}
+
+async function toggleAllList(masterCheckbox) {
+  const checked = masterCheckbox.checked;
+  showOverlay("saving");
+
+  masterCheckbox.disabled = true;
+  const checkboxes = document.querySelectorAll('#data-table-body input[type="checkbox"][data-field="list"]');
+  checkboxes.forEach(cb => cb.disabled = true);
+
+  for (const row of visibleRows) {
+    const rtafId = row.rtafId;
+    if (row.list !== checked) {
+      row.list = checked;
+
+      const checkbox = document.querySelector(`#data-table-body input[data-rtafId="${rtafId}"]`);
+      if (checkbox) checkbox.checked = checked;
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?updateRole=1&rtafId=${rtafId}&role=list&value=${checked}`);
+        const text = await res.text();
+        console.log(`✅ ${rtafId}: ${text}`);
+      } catch (err) {
+        console.warn(`❌ ${rtafId}:`, err);
+      }
+    }
+  }
+
+  checkboxes.forEach(cb => cb.disabled = false);
+  masterCheckbox.disabled = false;
+
+  hideOverlay();
+  alert('✅ บันทึกสำเร็จ');
+}
+
+function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  return fetch(resource, {
+    ...options,
+    signal: controller.signal
+  }).finally(() => clearTimeout(id));
+}
+
+function addNewRow() {
+  const tbody = document.getElementById('data-table-body');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" id="new-rtafId" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
+    <td>
+      <select id="new-rank" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">
+        ${rankList.map(rank => `<option value="${rank}">${rank}</option>`).join('')}
+      </select>
+    </td>
+    <td><input type="text" id="new-name" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
+    <td><input type="text" id="new-position" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
+    <td>
+      <select id="new-unit" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">
+        ${unitList.map(unit => `<option value="${unit}">${unit}</option>`).join('')}
+      </select>
+    </td>
+    <td colspan="4">
+        <div class="flex items-center gap-2">
+          <button onclick="submitNewRow()" class="px-2 py-1 text-white bg-yellow-500 hover:bg-yellow-600 rounded" title="บันทึก">
+            <i data-lucide="save"></i>
+          </button>
+          <button onclick="loadPersonnelData()" class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ยกเลิก">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+    </td>
+  `;
+  tbody.prepend(tr);
+  lucide.createIcons();
+}
+
+function submitNewRow() {
+  showOverlay("saving");
+
+  const rtafId = document.getElementById('new-rtafId').value.trim();
+  const rank = document.getElementById('new-rank').value.trim();
+  const name = document.getElementById('new-name').value.trim();
+  const position = document.getElementById('new-position').value.trim();
+  const unit = document.getElementById('new-unit').value.trim();
+
+  if (!/^\d{10}$/.test(rtafId)) {
+    alert('⚠️ กรุณากรอกเลขประจำตัวข้าราชการให้ครบ 10 หลัก');
+    hideOverlay();
+    return;
+  }
+
+  if (!rank || !name || !position || !unit) {
+    alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน');
+    hideOverlay();
+    return;
+  }
+
+  const script = document.createElement('script');
+  const callbackName = 'jsonpCallback_' + Date.now();
+
+  window[callbackName] = function(response) {
+    if (response === 'success') {
+      alert('✅ เพิ่มข้อมูลเรียบร้อยแล้ว');
+      showOverlay("loading");
+      loadPersonnelData(); // hideOverlay() จะถูกเรียกใน loadPersonnelData
+    } else if (response === 'duplicate') {
+      alert('⚠️ มีเลขประจำตัวนี้ในระบบแล้ว');
+      hideOverlay();
+    } else {
+      alert('❌ ไม่สามารถเพิ่มข้อมูลได้');
+      hideOverlay();
+    }
+
+    delete window[callbackName];
+    script.remove();
+  };
+
+  const params = new URLSearchParams({
+    addPersonnel: '1',
+    rtafId,
+    rank,
+    name,
+    position,
+    unit,
+    callback: callbackName
+  });
+
+  script.src = `${SCRIPT_URL}?${params.toString()}`;
+  document.body.appendChild(script);
+}
+
+function editRow(rtafId) {
+  const person = personnelData.find(p => p.rtafId === rtafId);
+  if (!person) return;
+
+  const tr = [...document.querySelectorAll('#data-table-body tr')].find(row => row.children[0].textContent === rtafId);
+  if (!tr) return;
+
+  tr.innerHTML = `
+    <td>${rtafId}</td>
+    <td>
+      <select id="edit-rank-${rtafId}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">${rankList.map(rank => `<option value="${rank}" ${rank === person.rank ? 'selected' : ''}>${rank}</option>`).join('')}</select>
+    </td>
+    <td><input type="text" id="edit-name-${rtafId}" value="${person.name}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
+    <td><input type="text" id="edit-position-${rtafId}" value="${person.position}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;"></td>
+    <td>
+      <select id="edit-unit-${rtafId}" style="width: 100%; font-family: 'Noto Sans Thai', sans-serif; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; display: flex; flex-grow: 1;">${unitList.map(unit => `<option value="${unit}" ${unit === person.unit ? 'selected' : ''}>${unit}</option>`).join('')}</select>
+    </td>
+    <td colspan="4">
+      <div class="flex items-center gap-2">
+        <button onclick="submitEditRow('${rtafId}')" class="px-2 py-1 text-white bg-green-600 hover:bg-green-700 rounded" title="บันทึก">
+          <i data-lucide="save"></i>
+        </button>
+        <button onclick="loadPersonnelData()" class="px-2 py-1 text-white bg-gray-400 hover:bg-gray-500 rounded" title="ยกเลิก">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+    </td>
+  `;
+  lucide.createIcons();
+}
+
+function submitEditRow(rtafId) {
+  showOverlay("saving");
+
+  const rank = document.getElementById(`edit-rank-${rtafId}`).value;
+  const name = document.getElementById(`edit-name-${rtafId}`).value.trim();
+  const position = document.getElementById(`edit-position-${rtafId}`).value.trim();
+  const unit = document.getElementById(`edit-unit-${rtafId}`).value;
+
+  if (!rank || !name || !position || !unit) {
+    alert('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน');
+    hideOverlay();
+    return;
+  }
+
+  const callbackName = 'jsonpCallback_' + Date.now();
+  const script = document.createElement('script');
+
+  window[callbackName] = function(response) {
+    if (response === 'success') {
+      alert('✅ แก้ไขข้อมูลเรียบร้อยแล้ว');
+      loadPersonnelData(); // มี hideOverlay อยู่ในนั้น
+    } else {
+      alert('❌ ไม่สามารถบันทึกข้อมูลได้');
+      hideOverlay();
+    }
+
+    delete window[callbackName];
+    script.remove();
+  };
+
+  const params = new URLSearchParams({
+    updatePersonnel: '1',
+    rtafId,
+    rank,
+    name,
+    position,
+    unit,
+    callback: callbackName
+  });
+
+  script.src = `${SCRIPT_URL}?${params.toString()}`;
+  document.body.appendChild(script);
+}
+
+function deleteRow(rtafId) {
+  if (!confirm('⚠️ คุณแน่ใจว่าต้องการลบข้อมูลนี้?')) return;
+
+  showOverlay("saving");
+  const callbackName = 'jsonpDelete_' + Date.now();
+  const script = document.createElement('script');
+
+  window[callbackName] = function(response) {
+    if (response === 'success') {
+      alert('✅ ลบข้อมูลเรียบร้อยแล้ว');
+      loadPersonnelData();
+    } else {
+      alert('❌ ลบไม่สำเร็จ');
+      hideOverlay();
+    }
+
+    delete window[callbackName];
+    script.remove();
+  };
+
+  const params = new URLSearchParams({
+    deletePersonnel: '1',
+    rtafId,
+    callback: callbackName
+  });
+
+  script.src = `${SCRIPT_URL}?${params.toString()}`;
+  document.body.appendChild(script);
+}
+
+function resetSheet(sheetName) {
+  if (!confirm(`⚠️ คุณแน่ใจว่าต้องการล้างข้อมูลใน "${sheetName}"?`)) return;
+
+  showOverlay("saving");
+
+  const callbackName = 'jsonpReset_' + Date.now();
+  const script = document.createElement('script');
+
+  window[callbackName] = function(response) {
+    if (response === 'success') {
+      alert(`✅ ล้างข้อมูลใน "${sheetName}" เรียบร้อยแล้ว`);
+      hideOverlay();
+    } else {
+      alert(`❌ ล้างข้อมูลไม่สำเร็จ`);
+      hideOverlay();
+    }
+
+    delete window[callbackName];
+    script.remove();
+  };
+
+  const params = new URLSearchParams({
+    resetSheet: sheetName,
+    callback: callbackName
+  });
+
+  script.src = `${SCRIPT_URL}?${params.toString()}`;
+  document.body.appendChild(script);
+}
+
+function resetDrawerColumn() {
+  if (!confirm(`⚠️ ต้องการรีเซ็ตสิทธิ์ "ผู้จับรางวัล" ทั้งหมดใช่หรือไม่?`)) return;
+
+  showOverlay("saving");
+
+  const callbackName = 'jsonpDrawerReset_' + Date.now();
+  const script = document.createElement('script');
+
+  window[callbackName] = function(response) {
+    if (response === 'success') {
+      alert('✅ รีเซ็ตสิทธิ์ผู้จับรางวัลเรียบร้อยแล้ว');
+      loadPersonnelData(); // โหลดข้อมูลใหม่
+    } else {
+      alert('❌ ไม่สามารถรีเซ็ตสิทธิ์ได้');
+      hideOverlay();
+    }
+
+    delete window[callbackName];
+    script.remove();
+  };
+
+  const params = new URLSearchParams({
+    resetDrawers: '1',
+    callback: callbackName
+  });
+
+  script.src = `${SCRIPT_URL}?${params.toString()}`;
+  document.body.appendChild(script);
+}
+
+document.getElementById('searchInput').addEventListener('input', () => {
+  showOverlay("loading");
+  setTimeout(() => {
+    renderPersonnelTable(personnelData);
+    hideOverlay();
+  }, 10); // หน่วงเล็กน้อยให้ overlay มีเวลาแสดง
+});
+
+document.getElementById('unitFilter').addEventListener('change', () => {
+  showOverlay("loading");
+  setTimeout(() => {
+    renderPersonnelTable(personnelData);
+    hideOverlay();
+  }, 100);
+});
+
+function renderList(type, data) {
+  const listEl = document.getElementById(`${type}List`);
+  listEl.innerHTML = '';
+  data.forEach((row, index) => {
+    const li = document.createElement('li');
+    li.draggable = true;
+    li.dataset.index = index;
+    li.dataset.value = row[1];
+    li.innerHTML = `
+      <span>${row[1]}</span>
+      <div class="flex items-center gap-2">
+        <button onclick="edit${capitalize(type)}(${index})" class="px-2 py-1 text-white bg-yellow-500 hover:bg-yellow-600 rounded" title="แก้ไข">
+          <i data-lucide="edit"></i>
+        </button>
+        <button onclick="delete${capitalize(type)}(${index})" class="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded" title="ลบ">
+          <i data-lucide="trash-2"></i>
+        </button>
+      </div>
+    `;
+    addDragEvents(li, type);
+    listEl.appendChild(li);
+  });
+  lucide.createIcons();
+  hideOverlay();
+}
+
+function addDragEvents(el, type) {
+  el.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', e.target.dataset.index);
+  });
+  el.addEventListener('dragover', e => e.preventDefault());
+  el.addEventListener('drop', e => {
+    e.preventDefault();
+    const from = +e.dataTransfer.getData('text/plain');
+    const to = +e.target.closest('li').dataset.index;
+    const list = type === 'rank' ? rankListRaw : unitListRaw;
+    const moved = list.splice(from, 1)[0];
+    list.splice(to, 0, moved);
+    saveOrder(type, list);
+  });
+}
+
+function saveOrder(type, list) {
+  showOverlay("saving");
+  const callbackName = `jsonpSave_${type}_${Date.now()}`;
+
+  window[callbackName] = function(res) {
+    if (res === 'success') {
+      showOverlay("loading");
+      alert('✅ บันทึกสำเร็จ');
+      if (type === 'rank') {
+        loadRankList();
+      } else {
+        loadUnitList();
+      }
+    } else {
+      alert('❌ บันทึกไม่สำเร็จ');
+      hideOverlay();
+    }
+    delete window[callbackName];
+  };
+
+  const data = list.map(r => r[1]);
+  const params = new URLSearchParams({
+    updateList: type,
+    data: JSON.stringify(data),
+    callback: callbackName
+  });
+
+  const script = document.createElement('script');
+  script.src = `${SCRIPT_URL}?${params.toString()}`;
+  document.body.appendChild(script);
+}
+
+function addRank() {
+  const value = prompt('เพิ่มยศใหม่:');
+  if (!value) return;
+  updateItem('rank', 'add', value);
+}
+  
+function addUnit() {
+  const value = prompt('เพิ่มหน่วยใหม่:');
+  if (!value) return;
+  updateItem('unit', 'add', value);
+}
+  
+function editRank(index) {
+  const old = rankListRaw[index][1];
+  const value = prompt('แก้ไขยศ:', old);
+  if (value && value !== old) updateItem('rank', 'edit', value, index);
+}
+  
+function editUnit(index) {
+  const old = unitListRaw[index][1];
+  const value = prompt('แก้ไขหน่วย:', old);
+  if (value && value !== old) updateItem('unit', 'edit', value, index);
+}
+  
+function deleteRank(index) {
+  if (confirm('ลบยศนี้?')) updateItem('rank', 'delete', '', index);
+}
+  
+function deleteUnit(index) {
+  if (confirm('ลบหน่วยนี้?')) updateItem('unit', 'delete', '', index);
+}
+  
+function updateItem(type, action, value, index = -1) {
+  showOverlay("saving");
+  const callbackName = `jsonpUpdate_${type}_${Date.now()}`;
+  window[callbackName] = function(res) {
+    if (res === 'success') {
+      alert('✅ บันทึกสำเร็จ');
+      showOverlay("loading");
+      if (type === 'rank') loadRankList();
+      else loadUnitList();
+    } else {
+      alert('❌ เกิดข้อผิดพลาด');
+      hideOverlay();
+    }
+    delete window[callbackName];
+  };
+  const params = new URLSearchParams({
+    updateItem: type,
+    action,
+    value,
+    index,
+    callback: callbackName
+  });
+  const script = document.createElement('script');
+  script.src = `${SCRIPT_URL}?${params.toString()}`;
+  document.body.appendChild(script);
+}
+  
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+  
+document.addEventListener('DOMContentLoaded', initLiffAndCheckAdmin);
+</script>
+
+</body>
+</html>

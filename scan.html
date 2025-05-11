@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>QR Scan Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="./html5-qrcode.min.js" defer></script>
+  <script src="./config.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Thai', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f0f4f8;
+    }
+    .camera-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
+    .qr-title {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+    #qr-area {
+      width: 700px;
+      height: 700px;
+    }
+    #result {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      font-weight: bold;
+      background: white;
+      padding: 20px 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 8px 16px;
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="camera-wrapper">
+    <div id="qr-area"></div>
+  </div>
+  <div id="result"></div>
+  <button id="logout-btn" onclick="logout()" style="display:none">
+    <i data-lucide="log-out"></i>
+    Logout
+  </button>
+
+  <script>
+    function logout() {
+      if (liff.isLoggedIn()) {
+        liff.logout();
+        location.reload();
+      }
+    }
+
+    function waitForHtml5Qrcode(callback) {
+      if (typeof Html5Qrcode !== 'undefined') {
+        callback();
+      } else {
+        setTimeout(() => waitForHtml5Qrcode(callback), 200);
+      }
+    }
+
+    function showResult(msg) {
+      const resultEl = document.getElementById('result');
+      resultEl.innerHTML = msg;
+      resultEl.style.display = 'inline-block';
+    }
+
+    function hideResult() {
+      document.getElementById('result').style.display = 'none';
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+
+      try {
+        await liff.init({ liffId: LIFF_ID_SCAN });
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
+
+        const profile = await liff.getProfile();
+        const userId = profile.userId;
+        const res = await fetch(`${SCRIPT_URL}?checkAdmin=1&userId=${userId}`);
+        const isAdmin = await res.text();
+
+        if (isAdmin !== 'true') {
+          document.getElementById('qr-area').innerHTML = '<h1 style="color:red;">❌ คุณไม่มีสิทธิ์ใช้งานหน้านี้</h1>';
+          return;
+        }
+
+        sessionStorage.setItem('authorizedUserId', userId);
+        document.getElementById('logout-btn').style.display = 'inline-flex';
+
+        waitForHtml5Qrcode(() => {
+          const html5QrCode = new Html5Qrcode("qr-area");
+          const config = { fps: 10, qrbox: { width: 600, height: 600 } };
+
+          document.querySelector('.camera-wrapper').insertAdjacentHTML('afterbegin', '<br><br><div class="qr-title">โปรดสแกน QR Code ที่กล้อง<br>เพื่อลงทะเบียนเข้าร่วมงาน</div>');
+
+          function startScanner() {
+            html5QrCode.start(
+              { facingMode: "environment" },
+              config,
+              qrCodeMessage => {
+                html5QrCode.stop();
+                showResult("⏳ ตรวจสอบ...");
+
+                fetch(`${SCRIPT_URL}?verifyToken=1&data=${encodeURIComponent(qrCodeMessage)}&scanner=${userId}`)
+                  .then(res => res.json())
+                  .then(data => {
+                    showResult(data.message);
+                    if (data.sound) {
+                      const audio = new Audio(data.sound.includes('http') ? data.sound : `./sound/${data.sound}`);
+                      audio.play().catch(err => console.warn('Play blocked:', err));
+                    }
+                    setTimeout(() => {
+                      hideResult();
+                      startScanner();
+                    }, 2000);
+                  });
+              }
+            );
+          }
+
+          startScanner();
+        });
+      } catch (err) {
+        document.getElementById('qr-area').innerHTML = `<h1 style='color:red;'>❌ ERROR: ${err.message}</h1>`;
+        console.error('LIFF init failed', err);
+      }
+    });
+  </script>
+</body>
+</html>
+
