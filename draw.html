@@ -5,6 +5,7 @@
   <title>ระบบจับรางวัล</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="./config.js"></script>
   <style>
     body {
       font-family: 'Noto Sans Thai', sans-serif;
@@ -13,7 +14,6 @@
       background: #f4f7fa;
       color: #1a237e;
     }
-
     header {
       display: flex;
       align-items: center;
@@ -27,22 +27,18 @@
       font-size: 32px;
       font-weight: bold;
     }
-
     .container {
       display: flex;
       flex-wrap: wrap;
       gap: 20px;
     }
-
     .left-panel {
       flex: 0 0 30%;
     }
-
     .center-panel, .right-panel {
       flex-grow: 1;
       min-width: 280px;
     }
-
     .prize-table {
       width: 100%;
       border-collapse: collapse;
@@ -52,24 +48,20 @@
       border-radius: 10px;
       overflow: hidden;
     }
-
     .prize-table th, .prize-table td {
-      padding: 8px;
+      padding: 6px;
       text-align: center;
     }
-
     .prize-table th {
       background: #dceeff;
     }
-
-    .prize-table td input[type="checkbox"] {
-      transform: scale(1.2);
+    .prize-table input {
+      width: 100%;
+      box-sizing: border-box;
     }
-
-    .column-small { width: 60px; }
-    .column-medium { width: 100px; }
+    .column-small { width: 50px; }
+    .column-medium { width: 90px; }
     .column-wide { width: 160px; }
-
     .add-prize-btn {
       margin-top: 10px;
       padding: 10px 12px;
@@ -83,9 +75,7 @@
       justify-content: center;
       gap: 6px;
       width: 100%;
-      box-sizing: border-box;
     }
-
     .buttons {
       display: flex;
       justify-content: center;
@@ -93,7 +83,6 @@
       flex-wrap: wrap;
       margin: 30px 0;
     }
-
     .buttons button {
       padding: 10px 14px;
       font-weight: bold;
@@ -107,13 +96,11 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       cursor: pointer;
     }
-
     .btn-draw { background: #ff7043; }
     .btn-freeze { background: #00bcd4; }
     .btn-save { background: #43a047; }
     .btn-undo { background: #e53935; }
     .btn-next { background: #ab47bc; }
-
     .draw-round {
       background: #e3f2fd;
       padding: 20px;
@@ -121,19 +108,16 @@
       text-align: center;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-
     .draw-round h2 {
       margin: 0;
       font-size: 22px;
     }
-
     .draw-numbers {
       display: flex;
       justify-content: center;
       gap: 15px;
       margin: 20px 0;
     }
-
     .draw-number {
       font-size: 36px;
       font-weight: bold;
@@ -147,7 +131,10 @@
       justify-content: center;
       cursor: pointer;
     }
-
+    .draw-number.confirmed {
+      background: #c8e6c9;
+      border-color: #2e7d32;
+    }
     .remaining {
       background: #fff8e1;
       padding: 14px;
@@ -156,21 +143,17 @@
       text-align: center;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-
     .result-section {
       margin-top: 10px;
       font-size: 15px;
     }
-
     .result-section h3 {
       margin: 10px 0 5px;
       color: #0d47a1;
     }
-
     .result-section ol {
       margin-left: 20px;
     }
-
     .reset-btn {
       position: absolute;
       top: 20px;
@@ -191,7 +174,9 @@
 </head>
 <body>
 
-  <button class="reset-btn"><i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ</button>
+  <button class="reset-btn" onclick="resetAll()">
+    <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
+  </button>
 
   <header>
     <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="Logo">
@@ -199,7 +184,6 @@
   </header>
 
   <div class="container">
-    <!-- ตารางรางวัล -->
     <div class="left-panel">
       <table class="prize-table">
         <thead>
@@ -208,56 +192,212 @@
             <th class="column-wide">รางวัล</th>
             <th class="column-small">จำนวน</th>
             <th class="column-small">ยืนยัน</th>
-            <th class="column-medium">แก้ไข/ลบ</th>
+            <th class="column-medium">ลบ</th>
           </tr>
         </thead>
-        <tbody id="prize-list">
-          <!-- เติมโดย JS -->
-        </tbody>
+        <tbody id="prize-list"></tbody>
       </table>
       <button class="add-prize-btn" onclick="addPrizeRow()">
         <i data-lucide="plus-circle"></i> เพิ่มรางวัล
       </button>
     </div>
 
-    <!-- โซนสุ่มรางวัล -->
     <div class="center-panel">
       <div class="buttons">
-        <button class="btn-draw"><i data-lucide="shuffle"></i> สุ่มหมายเลข</button>
-        <button class="btn-freeze"><i data-lucide="target"></i> จับหมายเลข</button>
-        <button class="btn-save"><i data-lucide="check-circle"></i> บันทึก</button>
-        <button class="btn-undo"><i data-lucide="rotate-ccw"></i> ยกเลิกรอบ</button>
-        <button class="btn-next"><i data-lucide="arrow-right-circle"></i> รอบถัดไป</button>
+        <button class="btn-draw" onclick="startRandom()"><i data-lucide="shuffle"></i> สุ่มหมายเลข</button>
+        <button class="btn-freeze" onclick="stopRandom()"><i data-lucide="target"></i> จับหมายเลข</button>
+        <button class="btn-save" onclick="saveResult()"><i data-lucide="check-circle"></i> บันทึก</button>
+        <button class="btn-undo" onclick="undoLast()"><i data-lucide="rotate-ccw"></i> ยกเลิกรอบ</button>
+        <button class="btn-next" onclick="nextRound()"><i data-lucide="arrow-right-circle"></i> รอบถัดไป</button>
       </div>
 
       <div class="draw-round">
-        <h2>รอบที่ 1 - เงิน 500 บาท</h2>
-        <div class="draw-numbers" id="number-boxes">
-          <!-- เติมโดย JS -->
-        </div>
+        <h2 id="round-title">รอบที่ 1 - </h2>
+        <div class="draw-numbers" id="number-boxes"></div>
       </div>
 
-      <div class="remaining" id="remaining-info">
-        คงเหลือผู้ลงทะเบียน จำนวน 53 คน<br>
-        1, 2, 3, ...
-      </div>
+      <div class="remaining" id="remaining-info">กำลังโหลด...</div>
     </div>
 
-    <!-- รายชื่อผู้ได้รับรางวัล -->
-    <div class="right-panel result-section" id="winner-list">
-      <h3>ผู้ได้รับรางวัล รอบที่ 1</h3>
-      <ol>
-        <!-- รายชื่อ -->
-      </ol>
-      <h3>ผู้ได้รับรางวัล รอบที่ 2</h3>
-      <ol>
-        <!-- รายชื่อ -->
-      </ol>
-    </div>
+    <div class="right-panel result-section" id="winner-list"></div>
   </div>
 
   <script>
-    lucide.createIcons();
+    let currentRound = 1;
+    let prizeList = JSON.parse(localStorage.getItem('prizeList') || '[]');
+    let registData = [];
+    let remaining = [];
+    let drawnNumbers = [];
+    let interval = null;
+
+    async function loadRegistData() {
+      const res = await fetch(`${SCRIPT_URL}?getRegistList=1`);
+      registData = await res.json();
+      remaining = registData.map((_, i) => i + 1);
+      updateRemaining();
+    }
+
+    function updateRemaining() {
+      document.getElementById("remaining-info").innerHTML =
+        `คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน<br>${remaining.join(', ')}`;
+    }
+
+    function renderPrizeTable() {
+      const tbody = document.getElementById("prize-list");
+      tbody.innerHTML = '';
+      prizeList.forEach((row, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><input value="${row[0]}" onchange="editPrize(${i},0,this.value)"></td>
+            <td><input value="${row[1]}" onchange="editPrize(${i},1,this.value)"></td>
+            <td><input value="${row[2]}" onchange="editPrize(${i},2,this.value)"></td>
+            <td><input type="checkbox" ${row[3] ? 'checked' : ''} onchange="editPrize(${i},3,this.checked)"></td>
+            <td><button onclick="deletePrize(${i})"><i data-lucide="trash-2"></i></button></td>
+          </tr>
+        `;
+      });
+      lucide.createIcons();
+      updateRoundTitle();
+    }
+
+    function addPrizeRow() {
+      prizeList.push([currentRound, '', 1, false]);
+      savePrizeList();
+    }
+
+    function editPrize(i, col, val) {
+      prizeList[i][col] = col === 3 ? !!val : val;
+      savePrizeList();
+    }
+
+    function deletePrize(i) {
+      if (confirm('ลบรายการนี้?')) {
+        prizeList.splice(i, 1);
+        savePrizeList();
+      }
+    }
+
+    function savePrizeList() {
+      localStorage.setItem('prizeList', JSON.stringify(prizeList));
+      renderPrizeTable();
+    }
+
+    function updateRoundTitle() {
+      const prize = prizeList.find(p => Number(p[0]) === currentRound);
+      const text = prize ? `รอบที่ ${prize[0]} - ${prize[1]}` : `รอบที่ ${currentRound}`;
+      document.getElementById("round-title").innerText = text;
+    }
+
+    function startRandom() {
+      const count = getPrizeCount();
+      const box = document.getElementById("number-boxes");
+      drawnNumbers = [];
+      box.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('div');
+        el.className = 'draw-number';
+        el.innerText = '🎲';
+        box.appendChild(el);
+      }
+      interval = setInterval(() => {
+        [...box.children].forEach(el => {
+          const rand = remaining[Math.floor(Math.random() * remaining.length)] || '❌';
+          el.innerText = rand;
+        });
+      }, 100);
+    }
+
+    function stopRandom() {
+      if (interval) clearInterval(interval);
+      const count = getPrizeCount();
+      drawnNumbers = [];
+      while (drawnNumbers.length < count && remaining.length > 0) {
+        const rand = remaining[Math.floor(Math.random() * remaining.length)];
+        if (!drawnNumbers.includes(rand)) drawnNumbers.push(rand);
+      }
+      const box = document.getElementById("number-boxes");
+      box.innerHTML = '';
+      drawnNumbers.forEach(num => {
+        const el = document.createElement('div');
+        el.className = 'draw-number';
+        el.innerText = num;
+        el.onclick = () => el.classList.toggle('confirmed');
+        box.appendChild(el);
+      });
+    }
+
+    async function saveResult() {
+      const prize = prizeList.find(p => Number(p[0]) === currentRound);
+      const confirmMode = prize[3];
+      const confirmed = [...document.querySelectorAll('.draw-number.confirmed')].map(el => Number(el.innerText));
+      const toSave = confirmMode ? confirmed : drawnNumbers;
+      if (toSave.length === 0) return alert("ยังไม่ได้เลือกหมายเลข");
+
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'saveDrawResult', round: prize[0], prize: prize[1], numbers: toSave }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      remaining = remaining.filter(n => !toSave.includes(n));
+      updateRemaining();
+      renderWinners();
+    }
+
+async function renderWinners() {
+  const res = await fetch(`${SCRIPT_URL}?getDrawResult=1`);
+  const data = await res.json(); // [[round, prize, num, RTAF_ID, name], ...]
+
+  const group = {};
+  data.forEach(([round, prize, num, , name]) => {
+    if (!group[round]) group[round] = [];
+    group[round].push(`${num}. ${name}`);
+  });
+
+  const sortedRounds = Object.keys(group).sort((a, b) => b - a); // เรียงรอบจากมากไปน้อย
+  const container = document.getElementById("winner-list");
+  container.innerHTML = '';
+
+  for (const round of sortedRounds) {
+    container.innerHTML += `
+      <h3>ผู้ได้รับรางวัล รอบที่ ${round}</h3>
+      <ol>${group[round].map(n => `<li>${n}</li>`).join('')}</ol>
+    `;
+  }
+}
+
+    function getPrizeCount() {
+      const prize = prizeList.find(p => Number(p[0]) === currentRound);
+      return prize ? Number(prize[2]) : 1;
+    }
+
+    function undoLast() {
+      fetch(`${SCRIPT_URL}?undoDraw=1&round=${currentRound}`).then(() => {
+        alert("❌ ยกเลิกรอบล่าสุดแล้ว");
+        loadRegistData();
+        renderWinners();
+      });
+    }
+
+    function nextRound() {
+      currentRound++;
+      updateRoundTitle();
+      document.getElementById("number-boxes").innerHTML = '';
+    }
+
+    function resetAll() {
+      if (confirm("⚠️ ต้องการรีเซ็ตระบบจับรางวัลทั้งหมดใช่หรือไม่?")) {
+        localStorage.removeItem('prizeList');
+        location.reload();
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      renderPrizeTable();
+      loadRegistData();
+      renderWinners();
+      lucide.createIcons();
+    });
   </script>
 </body>
 </html>
