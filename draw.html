@@ -459,13 +459,17 @@ function resetAll() {
 
     const callbackName = `resetCallback_${Date.now()}`;
     window[callbackName] = function(response) {
-      alert("✅ ล้างข้อมูลใน sheet drawprize สำเร็จ");
+      alert("✅ ล้างข้อมูลใน Sheet drawprize สำเร็จ");
       location.reload();
       delete window[callbackName];
     };
 
     const script = document.createElement('script');
     script.src = `${SCRIPT_URL}?resetSheet=drawprize&callback=${callbackName}`;
+    script.onerror = () => {
+      alert("❌ ล้างข้อมูลไม่สำเร็จ");
+      delete window[callbackName];
+    };
     document.body.appendChild(script);
   }
 }
