@@ -62,6 +62,9 @@
       width: 100%;
       box-sizing: border-box;
     }
+.prize-table input[type="number"] {
+  text-align: center;
+}
     .column-small { width: 50px; }
     .column-medium { width: 90px; }
     .column-wide { width: 160px; }
@@ -281,7 +284,7 @@ function renderPrizeTable() {
       <tr>
         <td>${i + 1}</td>
         <td><input value="${row[1]}" onchange="editPrize(${i},1,this.value)"></td>
-        <td><input value="${row[2]}" onchange="editPrize(${i},2,this.value)"></td>
+        <td><input type="number" value="${row[2]}" onchange="editPrize(${i},2,this.value)"></td>
         <td><input type="checkbox" ${row[3] ? 'checked' : ''} onchange="editPrize(${i},3,this.checked)"></td>
         <td><button onclick="deletePrize(${i})"><i data-lucide="trash-2"></i></button></td>
       </tr>
