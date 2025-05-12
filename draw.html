@@ -325,25 +325,33 @@ function startRandom() {
   const count = Number(prize[2]);
   const confirmMode = prize[3];
   const box = document.getElementById("number-boxes");
+  const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
+  const confirmedNums = confirmedEls.map(el => Number(el.innerText));
 
-  if (!confirmMode) {
-    drawnNumbers = [];
-    box.innerHTML = '';
-    for (let i = 0; i < count; i++) {
-      const el = document.createElement('div');
-      el.className = 'draw-number';
-      el.innerText = '🎲';
-      box.appendChild(el);
-    }
-    interval = setInterval(() => {
-      [...box.children].forEach(el => {
-        const rand = remaining[Math.floor(Math.random() * remaining.length)] || '❌';
-        el.innerText = rand;
-      });
-    }, 100);
-  } else {
-    stopRandom(); // ⬅️ force into next state with preserved confirmed
+  // ลบกล่องที่ยังไม่เลือกออก + ลบเลขออกจาก remaining
+  const nonConfirmedEls = [...box.querySelectorAll('.draw-number:not(.confirmed)')];
+  const nonConfirmedNums = nonConfirmedEls.map(el => Number(el.innerText));
+  remaining = remaining.filter(n => !nonConfirmedNums.includes(n));
+  nonConfirmedEls.forEach(el => el.remove());
+
+  drawnNumbers = [...confirmedNums];
+
+  // เพิ่มกล่องใหม่ที่เหลือพร้อมแสดง 🎲
+  for (let i = drawnNumbers.length; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'draw-number';
+    el.innerText = '🎲';
+    box.appendChild(el);
   }
+
+  // เริ่มวิ่งตัวเลข
+  interval = setInterval(() => {
+    [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
+      const rand = remaining[Math.floor(Math.random() * remaining.length)] || '❌';
+      el.innerText = rand;
+    });
+  }, 100);
+
   setButtonState('freeze');
 }
 
@@ -351,55 +359,17 @@ function stopRandom() {
   if (interval) clearInterval(interval);
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
   if (!prize) return;
-
-  const count = Number(prize[2]);
   const confirmMode = prize[3];
+
   const box = document.getElementById("number-boxes");
-
-  if (!confirmMode) {
-    drawnNumbers = [];
-    while (drawnNumbers.length < count && remaining.length > 0) {
-      const rand = remaining[Math.floor(Math.random() * remaining.length)];
-      if (!drawnNumbers.includes(rand)) drawnNumbers.push(rand);
-    }
-    box.innerHTML = '';
-    drawnNumbers.forEach(num => {
-      const el = document.createElement('div');
-      el.className = 'draw-number';
-      el.innerText = num;
-      box.appendChild(el);
-    });
-    return setButtonState('draw');
-  }
-
-  // ✅ Confirm Mode
-  const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
-  const confirmed = confirmedEls.map(el => Number(el.innerText));
-
-  // ลบเลขที่ไม่ยืนยันออกจาก remaining
-  const nonConfirmed = [...box.querySelectorAll('.draw-number:not(.confirmed)')].map(el => Number(el.innerText));
-  remaining = remaining.filter(n => !nonConfirmed.includes(n));
-
-  // ลบกล่องที่ไม่ยืนยัน
-  nonConfirmed.forEach(num => {
-    const el = [...box.children].find(e => Number(e.innerText) === num);
-    if (el) el.remove();
+  const drawEls = [...box.querySelectorAll('.draw-number:not(.confirmed)')];
+  drawEls.forEach(el => {
+    const rand = remaining[Math.floor(Math.random() * remaining.length)];
+    el.innerText = rand;
+    if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
   });
 
-  drawnNumbers = [...confirmed];
-
-  // เพิ่มกล่องใหม่ตามจำนวนที่ขาด
-  while (drawnNumbers.length < count && remaining.length > 0) {
-    const rand = remaining[Math.floor(Math.random() * remaining.length)];
-    if (!drawnNumbers.includes(rand)) {
-      drawnNumbers.push(rand);
-      const el = document.createElement('div');
-      el.className = 'draw-number';
-      el.innerText = rand;
-      el.onclick = () => el.classList.toggle('confirmed');
-      box.appendChild(el);
-    }
-  }
+  drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
   setButtonState('draw');
 }
 
@@ -411,7 +381,7 @@ function saveResult() {
 
   if (toSave.length < Number(prize[2])) {
     alert(`ยังเลือกไม่ครบจำนวน (${toSave.length}/${prize[2]})`);
-    return stopRandom();
+    return;
   }
 
   const callbackName = `jsonpCallback_${Date.now()}`;
