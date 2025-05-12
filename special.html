@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>ระบบจับรางวัลพิเศษ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="./config.js"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Thai', sans-serif;
+      background: #e9f4fb;
+      margin: 0;
+      padding: 20px;
+      color: #1a237e;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    header .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    header .logo img {
+      height: 50px;
+    }
+    header .logo-title {
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .group-bars {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    .group-bar {
+      flex: 1;
+      background: white;
+      border-radius: 15px;
+      padding: 10px 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .bar-label {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    .progress {
+      height: 20px;
+      border-radius: 10px;
+      background: #e0e0e0;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, #e74c3c, #f39c12, #f1c40f, #6cc644);
+    }
+    .remaining-box {
+      font-size: 14px;
+      background: #fff8e1;
+      border-radius: 10px;
+      padding: 8px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .left-panel, .right-panel {
+      width: 20%;
+    }
+    .center-panel {
+      flex: 1;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
+    }
+    .buttons button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: 'Noto Sans Thai', sans-serif;
+      color: white;
+      cursor: pointer;
+    }
+    .btn-draw { background: #ff7043; }
+    .btn-freeze { background: #00bcd4; }
+    .btn-save { background: #43a047; }
+    .btn-next { background: #ab47bc; }
+    .draw-round h2 {
+      text-align: center;
+      font-size: 24px;
+      margin: 10px 0;
+      color: #007ac0;
+    }
+    .draw-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+    .draw-number {
+      width: 60px;
+      height: 60px;
+      background: white;
+      border: 2px solid #1a237e;
+      border-radius: 10px;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .draw-number.confirmed {
+      background: #c8e6c9;
+      border-color: #2e7d32;
+    }
+    .winner-list {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .winner-list h3 {
+      text-align: center;
+      color: #007ac0;
+      margin-top: 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="logo">
+      <div class="logo-title">ระบบจับรางวัลพิเศษ</div>
+    </div>
+  </header>
+
+  <div class="group-bars" id="group-bars"></div>
+
+  <div class="container">
+    <div class="left-panel">
+      <table class="prize-table">
+        <thead>
+          <tr>
+            <th>รอบที่</th><th>ชื่อรางวัล</th><th>จำนวน</th><th>อยู่ในงาน</th><th>ลบ</th>
+          </tr>
+        </thead>
+        <tbody id="prize-list"></tbody>
+      </table>
+      <button onclick="addPrizeRow()">➕ เพิ่มรางวัล</button>
+    </div>
+    <div class="center-panel">
+      <div class="buttons">
+        <button class="btn-draw" onclick="startRandom()">🎲 สุ่มหมายเลข</button>
+        <button class="btn-freeze" onclick="stopRandom()">🎯 จับหมายเลข</button>
+        <button class="btn-save" onclick="saveResult()">✅ บันทึก</button>
+        <button class="btn-next" onclick="nextRound()">➡️ รอบถัดไป</button>
+      </div>
+      <div class="draw-round">
+        <h2 id="round-title">รอบที่ 1 - </h2>
+        <div class="draw-numbers" id="number-boxes"></div>
+      </div>
+    </div>
+    <div class="right-panel">
+      <div class="winner-list" id="winner-list">
+        <h3>ผู้ได้รับรางวัล</h3>
+        <!-- winner content -->
+      </div>
+    </div>
+  </div>
+
+<script>
+// JS logic ที่รวมจาก draw.html และ summary.html จะถูกเพิ่มในขั้นต่อไป
+</script>
+</body>
+</html>
