@@ -329,7 +329,7 @@ function startRandom() {
   const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
   const confirmedNums = confirmedEls.map(el => Number(el.innerText));
 
-  // ลบเลขที่ไม่ได้เลือกออกจาก remaining
+  // ลบเลขที่ไม่ได้เลือกออกจาก remaining (realtime)
   if (confirmMode && box.children.length > 0) {
     const allDrawn = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
     const unconfirmed = allDrawn.filter(n => !confirmedNums.includes(n));
@@ -376,6 +376,12 @@ function stopRandom() {
     if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
     newDraw.push(rand);
   });
+
+  // หาก confirmMode ให้ตัดเลขที่สุ่มได้ออก (แต่ไม่ถูกเลือกไว้ก่อน) จาก remaining
+  if (confirmMode) {
+    remaining = remaining.filter(n => !newDraw.includes(n));
+    updateRemaining();
+  }
 
   drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
   setButtonState('draw');
