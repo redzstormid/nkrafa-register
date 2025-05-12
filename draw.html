@@ -298,6 +298,10 @@ function hideOverlay() {
   document.getElementById("overlay").style.display = "none";
 }
 
+function saveRemainingToStorage() {
+  localStorage.setItem("remaining", JSON.stringify(remaining));
+}
+
 const buttons = {
   draw: document.querySelector('.btn-draw'),
   freeze: document.querySelector('.btn-freeze'),
@@ -331,6 +335,7 @@ async function loadRegistData() {
   registData = await res.json();
   remaining = registData.map((_, i) => i + 1);
   updateRemaining();
+  saveRemainingToStorage();
   setButtonState('draw');
 }
 
@@ -404,6 +409,7 @@ function startRandom() {
     const allDrawn = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
     const unconfirmed = allDrawn.filter(n => !confirmedNums.includes(n));
     remaining = remaining.filter(n => !unconfirmed.includes(n));
+    saveRemainingToStorage();
   }
 
   // สร้างกล่องใหม่: คงไว้เฉพาะที่เลือกแล้ว
@@ -469,6 +475,7 @@ function stopRandom() {
   if (confirmMode) {
     remaining = remaining.filter(n => !newDraw.includes(n));
     updateRemaining();
+    saveRemainingToStorage();
   }
 
   drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
@@ -494,6 +501,7 @@ function saveResult() {
     alert("✅ บันทึกสำเร็จ");
     remaining = remaining.filter(n => !toSave.includes(n));
     updateRemaining();
+    saveRemainingToStorage();
     renderWinners();
     setButtonState('done');
     delete window[callbackName];
