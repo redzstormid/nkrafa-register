@@ -454,9 +454,19 @@ function nextRound() {
 }
 
 function resetAll() {
-  if (confirm('⚠️ ต้องการรีเซ็ตระบบจับรางวัลทั้งหมดใช่หรือไม่?')) {
+  if (confirm("⚠️ ต้องการรีเซ็ตระบบจับรางวัลทั้งหมดใช่หรือไม่?")) {
     localStorage.removeItem('prizeList');
-    location.reload();
+
+    const callbackName = `resetCallback_${Date.now()}`;
+    window[callbackName] = function(response) {
+      alert("✅ ล้างข้อมูลใน sheet drawprize สำเร็จ");
+      location.reload();
+      delete window[callbackName];
+    };
+
+    const script = document.createElement('script');
+    script.src = `${SCRIPT_URL}?resetSheet=drawprize&callback=${callbackName}`;
+    document.body.appendChild(script);
   }
 }
 
