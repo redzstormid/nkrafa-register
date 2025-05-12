@@ -389,18 +389,18 @@ function startRandom() {
     box.appendChild(el);
   }
 
-  interval = setInterval(() => {
-    const available = [...remaining];
-    [...box.children].forEach(el => {
-      if (available.length === 0) {
-        el.innerText = '❌';
-        return;
-      }
-      const randIndex = Math.floor(Math.random() * available.length);
-      const rand = available.splice(randIndex, 1)[0];  // ดึงแบบไม่คืน
-      el.innerText = rand;
-    });
-  }, 100);
+interval = setInterval(() => {
+  const temp = [...remaining];  // สร้างชุดใหม่ทุกครั้ง
+  [...box.children].forEach(el => {
+    if (temp.length === 0) {
+      el.innerText = '❌';
+      return;
+    }
+    const randIndex = Math.floor(Math.random() * temp.length);
+    const rand = temp.splice(randIndex, 1)[0];
+    el.innerText = rand;
+  });
+}, 100);
 
   setButtonState('freeze');
 }
