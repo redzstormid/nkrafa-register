@@ -462,6 +462,15 @@ window.addEventListener('DOMContentLoaded', () => {
   loadRegistData();
   renderWinners();
   lucide.createIcons();
+
+  // 💡 ปรับ UI layout flex
+  const container = document.querySelector('.container');
+  container.style.display = 'flex';
+  container.style.flexWrap = 'nowrap';
+
+  document.querySelector('.left-panel').style.flex = '0 0 20%';
+  document.querySelector('.center-panel').style.flex = '1';
+  document.querySelector('.right-panel').style.flex = '0 0 20%';
 });
 </script>
 
