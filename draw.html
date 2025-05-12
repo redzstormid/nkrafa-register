@@ -366,10 +366,20 @@ function stopRandom() {
 
   const box = document.getElementById("number-boxes");
   const drawEls = [...box.querySelectorAll('.draw-number:not(.confirmed)')];
+  const newDraw = [];
+
   drawEls.forEach(el => {
     const rand = remaining[Math.floor(Math.random() * remaining.length)];
     el.innerText = rand;
-    if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
+    if (confirmMode) el.onclick = () => {
+      el.classList.toggle('confirmed');
+      const num = Number(el.innerText);
+      if (!el.classList.contains('confirmed')) {
+        remaining = remaining.filter(n => n !== num); // ❌ remove deselected immediately
+      }
+      updateRemaining();
+    };
+    newDraw.push(rand);
   });
 
   drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
