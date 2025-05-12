@@ -212,9 +212,14 @@
   </style>
 </head>
 <body>
-    <button class="reset-btn" onclick="resetAll()">
-      <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
-    </button>
+  <div id="overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
+    <div class="overlay-box" style="background:#fff;padding:20px 40px;border-radius:12px;font-size:22px;font-weight:bold;font-family:'Noto Sans Thai',sans-serif;color:#000;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
+      💾 กำลังบันทึกผลการจับรางวัล...
+    </div>
+  </div>
+  <button class="reset-btn" onclick="resetAll()">
+    <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
+  </button>
   <header>
     <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="Logo">
     <h1>ระบบจับรางวัล</h1>
@@ -265,6 +270,14 @@ let registData = [];
 let remaining = [];
 let drawnNumbers = [];
 let interval = null;
+
+// 🔽 เพิ่มไว้บนสุดใน <script>
+function showOverlay() {
+  document.getElementById("overlay").style.display = "flex";
+}
+function hideOverlay() {
+  document.getElementById("overlay").style.display = "none";
+}
 
 const buttons = {
   draw: document.querySelector('.btn-draw'),
@@ -443,6 +456,7 @@ function stopRandom() {
   setButtonState('draw');
 }
 
+// 🔁 แก้ฟังก์ชัน saveResult() ให้แสดง overlay ระหว่างบันทึก
 function saveResult() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
   const confirmMode = prize[3];
@@ -451,11 +465,13 @@ function saveResult() {
 
   if (toSave.length < Number(prize[2])) {
     alert(`ยังเลือกไม่ครบจำนวน (${toSave.length}/${prize[2]})`);
+    startRandom();
     return;
   }
 
   const callbackName = `jsonpCallback_${Date.now()}`;
   window[callbackName] = function(response) {
+    hideOverlay();
     alert("✅ บันทึกสำเร็จ");
     remaining = remaining.filter(n => !toSave.includes(n));
     updateRemaining();
@@ -463,6 +479,8 @@ function saveResult() {
     setButtonState('done');
     delete window[callbackName];
   };
+
+  showOverlay(); // ✅ แสดง overlay ก่อนส่ง
 
   const url = `${SCRIPT_URL}?saveResult=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&callback=${callbackName}`;
   const script = document.createElement('script');
