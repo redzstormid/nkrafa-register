@@ -325,21 +325,28 @@ function startRandom() {
   const count = Number(prize[2]);
   const confirmMode = prize[3];
   const box = document.getElementById("number-boxes");
-  const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
-  const confirmedNums = confirmedEls.map(el => Number(el.innerText));
 
-  // ✅ กรณียืนยัน: ตัดเลขที่ไม่เลือกออก และลบกล่อง
   if (confirmMode) {
-    const unconfirmedEls = [...box.querySelectorAll('.draw-number:not(.confirmed)')];
-    const unconfirmedNums = unconfirmedEls.map(el => Number(el.innerText));
-    remaining = remaining.filter(n => !unconfirmedNums.includes(n));
-    unconfirmedEls.forEach(el => el.remove());
+    const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
+    const confirmedNums = confirmedEls.map(el => Number(el.innerText));
+    const allDrawn = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
+    const unconfirmed = allDrawn.filter(n => !confirmedNums.includes(n));
+    remaining = remaining.filter(n => !unconfirmed.includes(n));
+    drawnNumbers = [...confirmedNums];
+    box.innerHTML = '';
+    confirmedNums.forEach(num => {
+      const el = document.createElement('div');
+      el.className = 'draw-number confirmed';
+      el.innerText = num;
+      el.onclick = () => el.classList.toggle('confirmed');
+      box.appendChild(el);
+    });
   } else {
     box.innerHTML = '';
+    drawnNumbers = [];
   }
 
-  drawnNumbers = [...confirmedNums];
-  for (let i = drawnNumbers.length; i < count; i++) {
+  for (let i = box.children.length; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'draw-number';
     el.innerText = '🎲';
@@ -363,10 +370,9 @@ function stopRandom() {
   const confirmMode = prize[3];
 
   const box = document.getElementById("number-boxes");
-  const drawEls = [...box.querySelectorAll('.draw-number:not(.confirmed)')];
   const newDraw = [];
 
-  drawEls.forEach(el => {
+  [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
     const rand = remaining[Math.floor(Math.random() * remaining.length)];
     el.innerText = rand;
     if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
