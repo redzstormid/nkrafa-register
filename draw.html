@@ -42,9 +42,6 @@
     .right-panel {
       flex: 0 0 20%;
     }
-    .column-small { width: 50px; }
-    .column-medium { width: 90px; }
-    .column-wide { width: 160px; }
     .prize-table {
       width: 100%;
       border-collapse: collapse;
@@ -111,7 +108,6 @@
     .btn-freeze { background: #00bcd4; }
     .btn-save { background: #43a047; }
     .btn-next { background: #ab47bc; }
-    .btn-reset { background: red; }
     .draw-round {
       background: #ffffff;
       padding: 20px;
@@ -124,6 +120,10 @@
       margin: 0;
       font-size: 22px;
       font-weight: bold;
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      display: inline-block;
     }
     .draw-numbers {
       display: flex;
@@ -150,13 +150,14 @@
       border-color: #2e7d32;
     }
     .remaining {
-      background: #ffffff;
+      background: white;
       padding: 14px;
       border-radius: 10px;
       text-align: center;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       border: 1px solid #ccc;
       font-weight: bold;
+      font-size: 16px;
     }
     .result-section {
       margin-top: 10px;
@@ -177,6 +178,22 @@
     }
     .result-section ol {
       margin-left: 20px;
+    }
+    .reset-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: red;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-weight: normal;
     }
   </style>
 </head>
