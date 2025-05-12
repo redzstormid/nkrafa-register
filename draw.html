@@ -95,7 +95,7 @@
     }
     .buttons button {
       padding: 10px 14px;
-      font-size: 14px;
+      font-size: 18px;
       border: none;
       border-radius: 8px;
       color: white;
@@ -168,6 +168,8 @@
       margin-left: 20px;
     }
     .reset-btn {
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 14px;
       position: absolute;
       top: 20px;
       right: 20px;
@@ -278,7 +280,7 @@ async function loadRegistData() {
 
 function updateRemaining() {
   document.getElementById("remaining-info").innerHTML =
-    `<b>คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน<b><br><br>${remaining.join(', ')}`;
+    `<h2>คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน</h2><br><br>${remaining.join(', ')}`;
 }
 
 function renderPrizeTable() {
