@@ -326,25 +326,24 @@ function startRandom() {
   const confirmMode = prize[3];
   const box = document.getElementById("number-boxes");
 
-  if (confirmMode) {
-    const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
-    const confirmedNums = confirmedEls.map(el => Number(el.innerText));
+  const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
+  const confirmedNums = confirmedEls.map(el => Number(el.innerText));
+
+  // ลบเลขที่ไม่ได้เลือกออกจาก remaining
+  if (confirmMode && box.children.length > 0) {
     const allDrawn = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
     const unconfirmed = allDrawn.filter(n => !confirmedNums.includes(n));
     remaining = remaining.filter(n => !unconfirmed.includes(n));
-    drawnNumbers = [...confirmedNums];
-    box.innerHTML = '';
-    confirmedNums.forEach(num => {
-      const el = document.createElement('div');
-      el.className = 'draw-number confirmed';
-      el.innerText = num;
-      el.onclick = () => el.classList.toggle('confirmed');
-      box.appendChild(el);
-    });
-  } else {
-    box.innerHTML = '';
-    drawnNumbers = [];
   }
+
+  box.innerHTML = '';
+  confirmedNums.forEach(num => {
+    const el = document.createElement('div');
+    el.className = 'draw-number confirmed';
+    el.innerText = num;
+    el.onclick = () => el.classList.toggle('confirmed');
+    box.appendChild(el);
+  });
 
   for (let i = box.children.length; i < count; i++) {
     const el = document.createElement('div');
@@ -368,10 +367,9 @@ function stopRandom() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
   if (!prize) return;
   const confirmMode = prize[3];
-
   const box = document.getElementById("number-boxes");
-  const newDraw = [];
 
+  const newDraw = [];
   [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
     const rand = remaining[Math.floor(Math.random() * remaining.length)];
     el.innerText = rand;
