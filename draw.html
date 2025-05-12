@@ -327,7 +327,7 @@ function savePrizeList() {
 
 function updateRoundTitle() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
-  const text = prize ? `<br>รอบที่ ${prize[0]} - ${prize[1]}<br>` : `<br>รอบที่ ${currentRound}<br>`;
+  const text = prize ? `รอบที่ ${prize[0]} - ${prize[1]}` : `รอบที่ ${currentRound}`;
   document.getElementById("round-title").innerText = text;
 }
 
@@ -438,7 +438,7 @@ function renderWinners() {
     for (const round of sortedRounds) {
       const { prize, list } = group[round];
       container.innerHTML += `
-        <h3><b>ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}<b></h3>
+        <h3><b>ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}</b></h3>
         ${list.map(w => `📌 ${w.no} – ${w.rank} ${w.name} (${w.unit})`).join('<br>')}
         <br><br>
       `;
