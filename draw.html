@@ -288,7 +288,7 @@ async function loadRegistData() {
 
 function updateRemaining() {
   document.getElementById("remaining-info").innerHTML =
-    `<h2 style="text-align:center; background-color:white; color:"#007ac0"; border-radius: 10px; padding: 15px 15px; display: flex; align-items: center; justify-content: center; cursor: pointer;">คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน</h2>${remaining.join(', ')}`;
+    `<h2 style="text-align:center; background-color:white; color:#007ac0; border-radius: 10px; padding: 20px 20px; display: flex; align-items: center; justify-content: center; cursor: pointer;">คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน</h2>${remaining.join(', ')}`;
 }
 
 function renderPrizeTable() {
@@ -448,7 +448,7 @@ function renderWinners() {
     for (const round of sortedRounds) {
       const { prize, list } = group[round];
       container.innerHTML += `
-        <h3 style="background-color:white; color:"#007ac0"; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer;">ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}</h3>
+        <h3 style="background-color:white; color:#007ac0; padding: 15px 15px; border-radius: 5px; display: flex; align-items: center; justify-content: center; cursor: pointer;">ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}</h3>
         ${list.map(w => `📌 ${w.no} – ${w.rank} ${w.name} (${w.unit})`).join('<br>')}
         <br><br>
       `;
