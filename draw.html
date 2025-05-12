@@ -328,19 +328,17 @@ function startRandom() {
   const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
   const confirmedNums = confirmedEls.map(el => Number(el.innerText));
 
-  // ✅ ตัดเลขออกจาก remaining ทันทีสำหรับกล่องที่ยังไม่เลือก (เฉพาะกรณี confirmMode เท่านั้น)
+  // ✅ กรณียืนยัน: ตัดเลขที่ไม่เลือกออก และลบกล่อง
   if (confirmMode) {
-    const nonConfirmedEls = [...box.querySelectorAll('.draw-number:not(.confirmed)')];
-    const nonConfirmedNums = nonConfirmedEls.map(el => Number(el.innerText));
-    remaining = remaining.filter(n => !nonConfirmedNums.includes(n));
-    nonConfirmedEls.forEach(el => el.remove());
+    const unconfirmedEls = [...box.querySelectorAll('.draw-number:not(.confirmed)')];
+    const unconfirmedNums = unconfirmedEls.map(el => Number(el.innerText));
+    remaining = remaining.filter(n => !unconfirmedNums.includes(n));
+    unconfirmedEls.forEach(el => el.remove());
   } else {
-    // ถ้าไม่ใช่ confirm mode → ล้างทั้งกล่องเลย
     box.innerHTML = '';
   }
 
   drawnNumbers = [...confirmedNums];
-
   for (let i = drawnNumbers.length; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'draw-number';
@@ -371,14 +369,7 @@ function stopRandom() {
   drawEls.forEach(el => {
     const rand = remaining[Math.floor(Math.random() * remaining.length)];
     el.innerText = rand;
-    if (confirmMode) el.onclick = () => {
-      el.classList.toggle('confirmed');
-      const num = Number(el.innerText);
-      if (!el.classList.contains('confirmed')) {
-        remaining = remaining.filter(n => n !== num); // ❌ remove deselected immediately
-      }
-      updateRemaining();
-    };
+    if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
     newDraw.push(rand);
   });
 
