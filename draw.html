@@ -459,7 +459,7 @@ function resetAll() {
 
     const callbackName = `resetCallback_${Date.now()}`;
     window[callbackName] = function(response) {
-      alert("✅ ล้างข้อมูลใน Sheet drawprize สำเร็จ");
+      alert("✅ ล้างข้อมูลระบบจับรางวัลสำเร็จ");
       location.reload();
       delete window[callbackName];
     };
