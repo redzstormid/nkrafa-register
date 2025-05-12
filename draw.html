@@ -412,7 +412,7 @@ function stopRandom() {
 
   const remainingBoxCount = count - confirmedNumbers.length;
 
-  // สร้างกล่องใหม่ (เฉพาะที่ยังไม่ถูกเลือก)
+  // เตรียมสร้างกล่องใหม่ทั้งหมด
   box.innerHTML = '';
   const boxes = [];
 
@@ -420,6 +420,7 @@ function stopRandom() {
     const el = document.createElement('div');
     el.className = 'draw-number confirmed';
     el.innerText = num;
+    el.onclick = () => el.classList.toggle('confirmed');  // ✅ ใส่ใหม่ด้วย
     box.appendChild(el);
     boxes.push(el);
   });
@@ -433,17 +434,17 @@ function stopRandom() {
   }
 
   let index = confirmedNumbers.length;
-  const newDraw = [];
+  const tempDraw = [];
 
   interval = setInterval(() => {
     if (index >= count || remaining.length === 0) {
       clearInterval(interval);
 
       if (confirmMode) {
-        // ตัดเลขที่สุ่มแล้วแต่ไม่ได้เลือก (เฉพาะ confirmMode เท่านั้น)
-        const existing = [...document.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
-        const unselected = existing.filter(n => !confirmedNumbers.includes(n));
-        remaining = remaining.filter(n => !unselected.includes(n));
+        // ตัดเลขที่สุ่มแล้วแต่ไม่เลือกออก (เฉพาะใน confirmMode)
+        const currentAll = [...document.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
+        const stillUnselected = currentAll.filter(n => !confirmedNumbers.includes(n));
+        remaining = remaining.filter(n => !stillUnselected.includes(n));
         updateRemaining();
       }
 
@@ -460,9 +461,8 @@ function stopRandom() {
       boxes[index].onclick = () => boxes[index].classList.toggle('confirmed');
     }
 
-    // เอาเลขออกจาก remaining ชั่วคราว
-    remaining.splice(randIndex, 1);
-    newDraw.push(rand);
+    tempDraw.push(rand);
+    remaining.splice(randIndex, 1);  // ✅ เอาออกเพื่อกันซ้ำ
 
     index++;
   }, 300);
