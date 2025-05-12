@@ -361,79 +361,66 @@ function startRandom() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
   if (!prize) return;
   const count = Number(prize[2]);
-  drawnNumbers = [];
-
+  const confirmMode = prize[3];
   const box = document.getElementById("number-boxes");
+
+  const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
+  const confirmedNums = confirmedEls.map(el => Number(el.innerText));
+
+  if (confirmMode && box.children.length > 0) {
+    const allDrawn = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
+    const unconfirmed = allDrawn.filter(n => !confirmedNums.includes(n));
+    remaining = remaining.filter(n => !unconfirmed.includes(n));
+  }
+
   box.innerHTML = '';
-  for (let i = 0; i < count; i++) {
+  confirmedNums.forEach(num => {
+    const el = document.createElement('div');
+    el.className = 'draw-number confirmed';
+    el.innerText = num;
+    el.onclick = () => el.classList.toggle('confirmed');
+    box.appendChild(el);
+  });
+
+  for (let i = box.children.length; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'draw-number';
     el.innerText = '🎲';
     box.appendChild(el);
   }
 
-interval = setInterval(() => {
-  const usedNumbers = new Set();
-  const tempRemaining = [...remaining];
-
-  [...box.children].forEach(el => {
-    let rand, idx;
-    do {
-      idx = Math.floor(Math.random() * tempRemaining.length);
-      rand = tempRemaining[idx];
-    } while (usedNumbers.has(rand) && usedNumbers.size < tempRemaining.length);
-
-    usedNumbers.add(rand);
-    el.innerText = rand || '❌';
-
-    // เอาเลขที่ใช้แล้วออก เพื่อไม่ให้ซ้ำ
-    tempRemaining.splice(idx, 1);
-  });
-}, 100);
+  interval = setInterval(() => {
+    [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
+      const rand = remaining[Math.floor(Math.random() * remaining.length)] || '❌';
+      el.innerText = rand;
+    });
+  }, 100);
 
   setButtonState('freeze');
 }
 
 function stopRandom() {
   if (interval) clearInterval(interval);
-
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
-  const count = Number(prize[2]);
+  if (!prize) return;
   const confirmMode = prize[3];
-
   const box = document.getElementById("number-boxes");
-  box.innerHTML = '';
-  drawnNumbers = [];
-  const boxes = [];
 
-  for (let i = 0; i < count; i++) {
-    const el = document.createElement('div');
-    el.className = 'draw-number';
-    el.innerText = '🎲';
-    box.appendChild(el);
-    boxes.push(el);
+  const newDraw = [];
+  [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
+    const rand = remaining[Math.floor(Math.random() * remaining.length)];
+    el.innerText = rand;
+    if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
+    newDraw.push(rand);
+  });
+
+  if (confirmMode) {
+    remaining = remaining.filter(n => !newDraw.includes(n));
+    updateRemaining();
   }
 
-  let i = 0;
-  interval = setInterval(() => {
-    if (i >= count || remaining.length === 0) {
-      clearInterval(interval);
-      setButtonState('save');
-      return;
-    }
-
-    // สุ่มไม่ซ้ำจาก remaining แล้วตัดออก
-    const idx = Math.floor(Math.random() * remaining.length);
-    const number = remaining.splice(idx, 1)[0];
-    boxes[i].innerText = number;
-    drawnNumbers.push(number);
-
-    if (confirmMode) {
-      boxes[i].onclick = () => boxes[i].classList.toggle('confirmed');
-    }
-
-    i++;
-  }, 300); // ความเร็วในการหยุดทีละกล่อง
+  drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
+  setButtonState('draw');
 }
 
 function saveResult() {
