@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>ระบบจับรางวัล</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="./config.js"></script>
   <style>
@@ -25,22 +25,23 @@
     }
     header h1 {
       font-size: 32px;
+      font-weight: normal;
     }
-.container {
-  display: flex;
-  flex-wrap: nowrap; /* ห้ามขึ้นบรรทัดใหม่ */
-  gap: 20px;
-  align-items: flex-start;
-}
-.left-panel {
-  flex: 0 0 20%;
-}
-.center-panel {
-  flex: 1 1 60%;
-}
-.right-panel {
-  flex: 0 0 20%;
-}
+    .container {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .left-panel {
+      flex: 0 0 20%;
+    }
+    .center-panel {
+      flex: 1 1 60%;
+    }
+    .right-panel {
+      flex: 0 0 20%;
+    }
     .prize-table {
       width: 100%;
       border-collapse: collapse;
@@ -53,20 +54,21 @@
     .prize-table th, .prize-table td {
       padding: 6px;
       text-align: center;
+      font-weight: normal;
     }
     .prize-table th {
       background: #dceeff;
     }
-    .prize-table input {
+    .prize-table input[type="text"],
+    .prize-table input[type="number"] {
       width: 100%;
       box-sizing: border-box;
+      text-align: center;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 14px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
     }
-.prize-table input[type="number"] {
-  text-align: center;
-}
-    .column-small { width: 50px; }
-    .column-medium { width: 90px; }
-    .column-wide { width: 160px; }
     .add-prize-btn {
       margin-top: 10px;
       padding: 10px 12px;
@@ -90,7 +92,6 @@
     }
     .buttons button {
       padding: 10px 14px;
-      font-weight: bold;
       font-size: 14px;
       border: none;
       border-radius: 8px;
@@ -100,11 +101,12 @@
       gap: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       cursor: pointer;
+      font-weight: normal;
+      font-family: 'Noto Sans Thai', sans-serif;
     }
     .btn-draw { background: #ff7043; }
     .btn-freeze { background: #00bcd4; }
     .btn-save { background: #43a047; }
-    .btn-undo { background: #e53935; }
     .btn-next { background: #ab47bc; }
     .draw-round {
       background: #e3f2fd;
@@ -116,17 +118,17 @@
     .draw-round h2 {
       margin: 0;
       font-size: 22px;
+      font-weight: normal;
     }
-.draw-numbers {
-  display: flex;
-  flex-wrap: wrap;     /* ✅ อนุญาตให้ขึ้นบรรทัดใหม่ */
-  gap: 15px;
-  margin: 20px 0;
-  justify-content: center; /* ✅ ให้จัดกลางแนวนอน */
-}
+    .draw-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 20px 0;
+      justify-content: center;
+    }
     .draw-number {
       font-size: 36px;
-      font-weight: bold;
       background: white;
       border: 3px solid #0d47a1;
       border-radius: 10px;
@@ -136,6 +138,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      font-weight: normal;
     }
     .draw-number.confirmed {
       background: #c8e6c9;
@@ -145,9 +148,9 @@
       background: #fff8e1;
       padding: 14px;
       border-radius: 10px;
-      font-weight: bold;
       text-align: center;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      font-weight: normal;
     }
     .result-section {
       margin-top: 10px;
@@ -156,6 +159,7 @@
     .result-section h3 {
       margin: 10px 0 5px;
       color: #0d47a1;
+      font-weight: normal;
     }
     .result-section ol {
       margin-left: 20px;
@@ -167,7 +171,6 @@
       background: red;
       color: white;
       padding: 10px 16px;
-      font-weight: bold;
       border: none;
       border-radius: 6px;
       cursor: pointer;
@@ -175,6 +178,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      font-weight: normal;
     }
   </style>
 </head>
