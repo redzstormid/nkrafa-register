@@ -396,26 +396,44 @@ interval = setInterval(() => {
 
 function stopRandom() {
   if (interval) clearInterval(interval);
+
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
-  if (!prize) return;
+  const count = Number(prize[2]);
   const confirmMode = prize[3];
+
   const box = document.getElementById("number-boxes");
+  box.innerHTML = '';
+  drawnNumbers = [];
+  const boxes = [];
 
-  const newDraw = [];
-  [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
-    const rand = remaining[Math.floor(Math.random() * remaining.length)];
-    el.innerText = rand;
-    if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
-    newDraw.push(rand);
-  });
-
-  if (confirmMode) {
-    remaining = remaining.filter(n => !newDraw.includes(n));
-    updateRemaining();
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'draw-number';
+    el.innerText = '🎲';
+    box.appendChild(el);
+    boxes.push(el);
   }
 
-  drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
-  setButtonState('draw');
+  let i = 0;
+  interval = setInterval(() => {
+    if (i >= count || remaining.length === 0) {
+      clearInterval(interval);
+      setButtonState('save');
+      return;
+    }
+
+    // สุ่มไม่ซ้ำจาก remaining แล้วตัดออก
+    const idx = Math.floor(Math.random() * remaining.length);
+    const number = remaining.splice(idx, 1)[0];
+    boxes[i].innerText = number;
+    drawnNumbers.push(number);
+
+    if (confirmMode) {
+      boxes[i].onclick = () => boxes[i].classList.toggle('confirmed');
+    }
+
+    i++;
+  }, 300); // ความเร็วในการหยุดทีละกล่อง
 }
 
 function saveResult() {
