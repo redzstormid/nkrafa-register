@@ -372,19 +372,24 @@ function startRandom() {
     box.appendChild(el);
   }
 
-  interval = setInterval(() => {
-    const available = [...remaining]; // new clone each interval
-    const used = new Set();
-    [...box.children].forEach(el => {
-      let rand;
-      do {
-        const idx = Math.floor(Math.random() * available.length);
-        rand = available[idx];
-      } while (used.has(rand) && used.size < available.length);
-      used.add(rand);
-      el.innerText = rand || '❌';
-    });
-  }, 100);
+interval = setInterval(() => {
+  const usedNumbers = new Set();
+  const tempRemaining = [...remaining];
+
+  [...box.children].forEach(el => {
+    let rand, idx;
+    do {
+      idx = Math.floor(Math.random() * tempRemaining.length);
+      rand = tempRemaining[idx];
+    } while (usedNumbers.has(rand) && usedNumbers.size < tempRemaining.length);
+
+    usedNumbers.add(rand);
+    el.innerText = rand || '❌';
+
+    // เอาเลขที่ใช้แล้วออก เพื่อไม่ให้ซ้ำ
+    tempRemaining.splice(idx, 1);
+  });
+}, 100);
 
   setButtonState('freeze');
 }
