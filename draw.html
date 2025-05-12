@@ -27,21 +27,19 @@
       font-size: 32px;
       font-weight: bold;
     }
-.container {
-  display: flex;
-  flex-wrap: nowrap; /* ห้ามขึ้นบรรทัดใหม่ */
-  gap: 20px;
-  align-items: flex-start;
-}
-.left-panel {
-  flex: 0 0 20%;
-}
-.center-panel {
-  flex: 1 1 60%;
-}
-.right-panel {
-  flex: 0 0 20%;
-}
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .left-panel {
+      flex: 0 0 20%;
+    }
+    .center-panel {
+      flex: 1 1 60%;
+    }
+    .right-panel {
+      flex: 0 0 20%;
+    }
     .prize-table {
       width: 100%;
       border-collapse: collapse;
@@ -58,29 +56,53 @@
     .prize-table th {
       background: #dceeff;
     }
-    .prize-table input {
+    .prize-table input[type="text"], .prize-table input[type="number"] {
       width: 100%;
-      box-sizing: border-box;
+      text-align: center;
     }
-.prize-table input[type="number"] {
-  text-align: center;
-}
-    .column-small { width: 50px; }
-    .column-medium { width: 90px; }
-    .column-wide { width: 160px; }
-    .add-prize-btn {
-      margin-top: 10px;
-      padding: 10px 12px;
-      font-size: 14px;
-      background: #f1f1f1;
-      border: 1px dashed #aaa;
-      border-radius: 6px;
-      cursor: pointer;
+    .draw-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .draw-number {
+      font-size: 24px;
+      font-weight: bold;
+      background: white;
+      border: 2px solid #1a237e;
+      border-radius: 8px;
+      width: 60px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      width: 100%;
+      cursor: pointer;
+    }
+    .draw-number.confirmed {
+      background: #c8e6c9;
+      border-color: #2e7d32;
+    }
+    .result-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .result-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 10px;
+      font-size: 14px;
+    }
+    .result-card h3 {
+      margin: 0 0 5px;
+      color: #1a237e;
+    }
+    .result-card ul {
+      margin: 0;
+      padding-left: 20px;
     }
     .buttons {
       display: flex;
@@ -105,86 +127,10 @@
     .btn-draw { background: #ff7043; }
     .btn-freeze { background: #00bcd4; }
     .btn-save { background: #43a047; }
-    .btn-undo { background: #e53935; }
     .btn-next { background: #ab47bc; }
-    .draw-round {
-      background: #e3f2fd;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-    .draw-round h2 {
-      margin: 0;
-      font-size: 22px;
-    }
-.draw-numbers {
-  display: flex;
-  flex-wrap: wrap;     /* ✅ อนุญาตให้ขึ้นบรรทัดใหม่ */
-  gap: 15px;
-  margin: 20px 0;
-  justify-content: center; /* ✅ ให้จัดกลางแนวนอน */
-}
-    .draw-number {
-      font-size: 36px;
-      font-weight: bold;
-      background: white;
-      border: 3px solid #0d47a1;
-      border-radius: 10px;
-      width: 70px;
-      height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-    .draw-number.confirmed {
-      background: #c8e6c9;
-      border-color: #2e7d32;
-    }
-    .remaining {
-      background: #fff8e1;
-      padding: 14px;
-      border-radius: 10px;
-      font-weight: bold;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .result-section {
-      margin-top: 10px;
-      font-size: 15px;
-    }
-    .result-section h3 {
-      margin: 10px 0 5px;
-      color: #0d47a1;
-    }
-    .result-section ol {
-      margin-left: 20px;
-    }
-    .reset-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: red;
-      color: white;
-      padding: 10px 16px;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
   </style>
 </head>
 <body>
-
-  <button class="reset-btn" onclick="resetAll()">
-    <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
-  </button>
-
   <header>
     <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="Logo">
     <h1>ระบบจับรางวัล</h1>
@@ -192,40 +138,32 @@
 
   <div class="container">
     <div class="left-panel">
+      <!-- ตารางรางวัล -->
       <table class="prize-table">
         <thead>
           <tr>
-            <th class="column-small">รอบที่</th>
-            <th class="column-wide">ชื่อรางวัล</th>
-            <th class="column-small">จำนวน</th>
-            <th class="column-medium">อยู่ในงาน</th>
-            <th class="column-small">ลบ</th>
+            <th>รอบ</th><th>ชื่อรางวัล</th><th>จำนวน</th><th>ยืนยัน</th><th>ลบ</th>
           </tr>
         </thead>
         <tbody id="prize-list"></tbody>
       </table>
-      <button class="add-prize-btn" onclick="addPrizeRow()">
-        <i data-lucide="plus-circle"></i> เพิ่มรางวัล
-      </button>
+      <button onclick="addPrizeRow()">เพิ่มรางวัล</button>
     </div>
 
     <div class="center-panel">
+      <!-- กล่องการสุ่ม -->
       <div class="buttons">
-        <button class="btn-draw" onclick="startRandom()"><i data-lucide="shuffle"></i> สุ่มหมายเลข</button>
-        <button class="btn-freeze" onclick="stopRandom()"><i data-lucide="target"></i> จับหมายเลข</button>
-        <button class="btn-save" onclick="saveResult()"><i data-lucide="check-circle"></i> บันทึก</button>
-        <button class="btn-next" onclick="nextRound()"><i data-lucide="arrow-right-circle"></i> รอบถัดไป</button>
+        <button class="btn-draw" onclick="startRandom()">🎯 สุ่ม</button>
+        <button class="btn-freeze" onclick="stopRandom()">🎯 จับ</button>
+        <button class="btn-save" onclick="saveResult()">💾 บันทึก</button>
+        <button class="btn-next" onclick="nextRound()">⏭ รอบถัดไป</button>
       </div>
-
-      <div class="draw-round">
-        <h2 id="round-title">รอบที่ 1 - </h2>
-        <div class="draw-numbers" id="number-boxes"></div>
-      </div>
-
-      <div class="remaining" id="remaining-info">กำลังโหลด...</div>
+      <div class="draw-numbers" id="number-boxes"></div>
     </div>
 
-    <div class="right-panel result-section" id="winner-list"></div>
+    <div class="right-panel result-section" id="winner-list">
+      <!-- รายชื่อผู้ได้รับรางวัล -->
+    </div>
   </div>
 
 <script>
