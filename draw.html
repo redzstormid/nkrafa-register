@@ -111,10 +111,6 @@
     .btn-freeze { background: #00bcd4; }
     .btn-save { background: #43a047; }
     .btn-next { background: #ab47bc; }
-    .btn-reset { 
-      background: red; 
-      position: absolute;
-    }
     .draw-round {
       background: #e3f2fd;
       padding: 20px;
@@ -190,11 +186,9 @@
   </style>
 </head>
 <body>
-  <div class="buttons">
-    <button class="btn-reset" onclick="resetAll()">
+    <button class="reset-btn" onclick="resetAll()">
       <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
     </button>
-  </div>
   <header>
     <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="Logo">
     <h1>ระบบจับรางวัล</h1>
@@ -284,7 +278,7 @@ async function loadRegistData() {
 
 function updateRemaining() {
   document.getElementById("remaining-info").innerHTML =
-    `คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน<br>${remaining.join(', ')}`;
+    `<b>คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน<b><br><br>${remaining.join(', ')}`;
 }
 
 function renderPrizeTable() {
@@ -333,7 +327,7 @@ function savePrizeList() {
 
 function updateRoundTitle() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
-  const text = prize ? `รอบที่ ${prize[0]} - ${prize[1]}` : `รอบที่ ${currentRound}`;
+  const text = prize ? `<br>รอบที่ ${prize[0]} - ${prize[1]}<br>` : `<br>รอบที่ ${currentRound}<br>`;
   document.getElementById("round-title").innerText = text;
 }
 
@@ -444,7 +438,7 @@ function renderWinners() {
     for (const round of sortedRounds) {
       const { prize, list } = group[round];
       container.innerHTML += `
-        <h3>ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}</h3>
+        <h3><b>ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}<b></h3>
         ${list.map(w => `📌 ${w.no} – ${w.rank} ${w.name} (${w.unit})`).join('<br>')}
         <br><br>
       `;
