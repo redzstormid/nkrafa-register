@@ -193,6 +193,18 @@
       gap: 6px;
       font-weight: normal;
     }
+    .winner-header {
+      background-color: white;
+      color: #007ac0;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -288,7 +300,7 @@ async function loadRegistData() {
 
 function updateRemaining() {
   document.getElementById("remaining-info").innerHTML =
-    `<h2 style="text-align:center; background-color:white; color:#007ac0; border-radius: 10px; padding: 6px 6px; display: flex; align-items: center; justify-content: center; cursor: pointer;">คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน</h2>${remaining.join(', ')}`;
+    `<h2 class="winner-header">คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน</h2>${remaining.join(', ')}`;
 }
 
 function renderPrizeTable() {
@@ -448,7 +460,7 @@ function renderWinners() {
     for (const round of sortedRounds) {
       const { prize, list } = group[round];
       container.innerHTML += `
-        <h3 style="background-color:white; color:#007ac0; padding: 6px 6px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer;">ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}</h3>
+        <h3 class="winner-header">ผู้ได้รับรางวัล รอบที่ ${round} - 🎁 ${prize}</h3>
         ${list.map(w => `📌 ${w.no} – ${w.rank} ${w.name} (${w.unit})`).join('<br>')}
         <br><br>
       `;
