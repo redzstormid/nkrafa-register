@@ -403,24 +403,69 @@ function stopRandom() {
   if (interval) clearInterval(interval);
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
   if (!prize) return;
+  const count = Number(prize[2]);
   const confirmMode = prize[3];
   const box = document.getElementById("number-boxes");
 
-  const newDraw = [];
-  [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
-    const rand = remaining[Math.floor(Math.random() * remaining.length)];
-    el.innerText = rand;
-    if (confirmMode) el.onclick = () => el.classList.toggle('confirmed');
-    newDraw.push(rand);
+  const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
+  const confirmedNumbers = confirmedEls.map(el => Number(el.innerText));
+
+  const remainingBoxCount = count - confirmedNumbers.length;
+
+  // สร้างกล่องใหม่ (เฉพาะที่ยังไม่ถูกเลือก)
+  box.innerHTML = '';
+  const boxes = [];
+
+  confirmedNumbers.forEach(num => {
+    const el = document.createElement('div');
+    el.className = 'draw-number confirmed';
+    el.innerText = num;
+    box.appendChild(el);
+    boxes.push(el);
   });
 
-  if (confirmMode) {
-    remaining = remaining.filter(n => !newDraw.includes(n));
-    updateRemaining();
+  for (let i = 0; i < remainingBoxCount; i++) {
+    const el = document.createElement('div');
+    el.className = 'draw-number';
+    el.innerText = '🎲';
+    box.appendChild(el);
+    boxes.push(el);
   }
 
-  drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
-  setButtonState('draw');
+  let index = confirmedNumbers.length;
+  const newDraw = [];
+
+  interval = setInterval(() => {
+    if (index >= count || remaining.length === 0) {
+      clearInterval(interval);
+
+      if (confirmMode) {
+        // ตัดเลขที่สุ่มแล้วแต่ไม่ได้เลือก (เฉพาะ confirmMode เท่านั้น)
+        const existing = [...document.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
+        const unselected = existing.filter(n => !confirmedNumbers.includes(n));
+        remaining = remaining.filter(n => !unselected.includes(n));
+        updateRemaining();
+      }
+
+      drawnNumbers = [...document.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
+      setButtonState('save');
+      return;
+    }
+
+    const randIndex = Math.floor(Math.random() * remaining.length);
+    const rand = remaining[randIndex];
+
+    boxes[index].innerText = rand;
+    if (confirmMode) {
+      boxes[index].onclick = () => boxes[index].classList.toggle('confirmed');
+    }
+
+    // เอาเลขออกจาก remaining ชั่วคราว
+    remaining.splice(randIndex, 1);
+    newDraw.push(rand);
+
+    index++;
+  }, 300);
 }
 
 function saveResult() {
