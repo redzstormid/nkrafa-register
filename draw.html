@@ -390,8 +390,14 @@ function startRandom() {
   }
 
   interval = setInterval(() => {
-    [...box.querySelectorAll('.draw-number:not(.confirmed)')].forEach(el => {
-      const rand = remaining[Math.floor(Math.random() * remaining.length)] || '❌';
+    const available = [...remaining];
+    [...box.children].forEach(el => {
+      if (available.length === 0) {
+        el.innerText = '❌';
+        return;
+      }
+      const randIndex = Math.floor(Math.random() * available.length);
+      const rand = available.splice(randIndex, 1)[0];  // ดึงแบบไม่คืน
       el.innerText = rand;
     });
   }, 100);
