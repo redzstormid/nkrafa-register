@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>ระบบจับรางวัล</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="./config.js"></script>
   <style>
@@ -11,7 +11,7 @@
       font-family: 'Noto Sans Thai', sans-serif;
       margin: 0;
       padding: 20px;
-      background: #f4f7fa;
+      background: #f6f9fc;
       color: #1a237e;
     }
     header {
@@ -24,167 +24,140 @@
       margin-right: 10px;
     }
     header h1 {
-      font-size: 32px;
-      font-weight: bold;
+      font-size: 28px;
+      font-weight: normal;
     }
-.container {
-  display: flex;
-  flex-wrap: nowrap; /* ห้ามขึ้นบรรทัดใหม่ */
-  gap: 20px;
-  align-items: flex-start;
-}
-.left-panel {
-  flex: 0 0 20%;
-}
-.center-panel {
-  flex: 1 1 60%;
-}
-.right-panel {
-  flex: 0 0 20%;
-}
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .left-panel {
+      flex: 0 0 20%;
+    }
+    .center-panel {
+      flex: 1 1 60%;
+    }
+    .right-panel {
+      flex: 0 0 20%;
+    }
     .prize-table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
       background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       border-radius: 10px;
       overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .prize-table th, .prize-table td {
       padding: 6px;
       text-align: center;
+      border-bottom: 1px solid #e0e0e0;
     }
     .prize-table th {
-      background: #dceeff;
-    }
-    .prize-table input {
-      width: 100%;
-      box-sizing: border-box;
-    }
-.prize-table input[type="number"] {
-  text-align: center;
-}
-    .column-small { width: 50px; }
-    .column-medium { width: 90px; }
-    .column-wide { width: 160px; }
-    .add-prize-btn {
-      margin-top: 10px;
-      padding: 10px 12px;
-      font-size: 14px;
-      background: #f1f1f1;
-      border: 1px dashed #aaa;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-    }
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin: 30px 0;
-    }
-    .buttons button {
-      padding: 10px 14px;
-      font-weight: bold;
-      font-size: 14px;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-    }
-    .btn-draw { background: #ff7043; }
-    .btn-freeze { background: #00bcd4; }
-    .btn-save { background: #43a047; }
-    .btn-undo { background: #e53935; }
-    .btn-next { background: #ab47bc; }
-    .draw-round {
       background: #e3f2fd;
-      padding: 20px;
-      border-radius: 12px;
+      font-weight: normal;
+    }
+    .prize-table input[type="text"],
+    .prize-table input[type="number"] {
+      width: 100%;
+      padding: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 13px;
       text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
-    .draw-round h2 {
-      margin: 0;
-      font-size: 22px;
+    .prize-table input[type="checkbox"] {
+      transform: scale(1.2);
     }
-.draw-numbers {
-  display: flex;
-  flex-wrap: wrap;     /* ✅ อนุญาตให้ขึ้นบรรทัดใหม่ */
-  gap: 15px;
-  margin: 20px 0;
-  justify-content: center; /* ✅ ให้จัดกลางแนวนอน */
-}
+    .draw-numbers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
     .draw-number {
-      font-size: 36px;
+      font-size: 22px;
       font-weight: bold;
       background: white;
-      border: 3px solid #0d47a1;
-      border-radius: 10px;
-      width: 70px;
-      height: 70px;
+      border: 2px solid #1565c0;
+      border-radius: 8px;
+      width: 60px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
     }
     .draw-number.confirmed {
       background: #c8e6c9;
       border-color: #2e7d32;
     }
-    .remaining {
-      background: #fff8e1;
-      padding: 14px;
-      border-radius: 10px;
-      font-weight: bold;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    .remaining-info {
+      background: #fff3e0;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.6;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-top: 10px;
     }
     .result-section {
-      margin-top: 10px;
-      font-size: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
-    .result-section h3 {
-      margin: 10px 0 5px;
+    .result-card {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 12px;
+      font-size: 14px;
+    }
+    .result-card h3 {
+      margin: 0 0 6px;
       color: #0d47a1;
+      font-weight: normal;
     }
-    .result-section ol {
-      margin-left: 20px;
+    .result-card ul {
+      margin: 0;
+      padding-left: 20px;
     }
-    .reset-btn {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: red;
-      color: white;
-      padding: 10px 16px;
-      font-weight: bold;
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .buttons button {
+      padding: 10px 14px;
+      font-size: 14px;
       border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      border-radius: 8px;
+      font-family: 'Noto Sans Thai', sans-serif;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
+      cursor: pointer;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: background 0.2s;
+    }
+    .btn-draw { background: #ff7043; color: white; }
+    .btn-freeze { background: #29b6f6; color: white; }
+    .btn-save { background: #43a047; color: white; }
+    .btn-next { background: #8e24aa; color: white; }
+    button:disabled {
+      background: #cfd8dc !important;
+      color: #888 !important;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-
-  <button class="reset-btn" onclick="resetAll()">
-    <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
-  </button>
-
   <header>
     <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="Logo">
     <h1>ระบบจับรางวัล</h1>
@@ -195,37 +168,28 @@
       <table class="prize-table">
         <thead>
           <tr>
-            <th class="column-small">รอบที่</th>
-            <th class="column-wide">ชื่อรางวัล</th>
-            <th class="column-small">จำนวน</th>
-            <th class="column-medium">อยู่ในงาน</th>
-            <th class="column-small">ลบ</th>
+            <th>รอบ</th><th>รางวัล</th><th>จำนวน</th><th>ยืนยัน</th><th>ลบ</th>
           </tr>
         </thead>
         <tbody id="prize-list"></tbody>
       </table>
-      <button class="add-prize-btn" onclick="addPrizeRow()">
-        <i data-lucide="plus-circle"></i> เพิ่มรางวัล
-      </button>
+      <button onclick="addPrizeRow()" class="btn-save" style="margin-top:10px;width:100%;">+ เพิ่มรางวัล</button>
     </div>
 
     <div class="center-panel">
       <div class="buttons">
-        <button class="btn-draw" onclick="startRandom()"><i data-lucide="shuffle"></i> สุ่มหมายเลข</button>
-        <button class="btn-freeze" onclick="stopRandom()"><i data-lucide="target"></i> จับหมายเลข</button>
-        <button class="btn-save" onclick="saveResult()"><i data-lucide="check-circle"></i> บันทึก</button>
-        <button class="btn-next" onclick="nextRound()"><i data-lucide="arrow-right-circle"></i> รอบถัดไป</button>
+        <button class="btn-draw">🎯 สุ่มหมายเลข</button>
+        <button class="btn-freeze">🎯 จับหมายเลข</button>
+        <button class="btn-save">💾 บันทึก</button>
+        <button class="btn-next">⏭ รอบถัดไป</button>
       </div>
-
-      <div class="draw-round">
-        <h2 id="round-title">รอบที่ 1 - </h2>
-        <div class="draw-numbers" id="number-boxes"></div>
-      </div>
-
-      <div class="remaining" id="remaining-info">กำลังโหลด...</div>
+      <div class="draw-numbers" id="number-boxes"></div>
+      <div class="remaining-info" id="remaining-info">กำลังโหลด...</div>
     </div>
 
-    <div class="right-panel result-section" id="winner-list"></div>
+    <div class="right-panel result-section" id="winner-list">
+      <!-- รายชื่อผู้ได้รับรางวัล -->
+    </div>
   </div>
 
 <script>
@@ -498,6 +462,6 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.right-panel').style.flex = '0 0 20%';
 });
 </script>
-
 </body>
 </html>
+
