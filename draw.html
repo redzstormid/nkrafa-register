@@ -209,11 +209,31 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       text-align: center;
     }
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #overlay .overlay-box {
+      background: #ffffff;
+      padding: 20px 40px;
+      border-radius: 12px;
+      font-size: 22px;
+      font-weight: bold;
+      font-family: 'Noto Sans Thai', sans-serif;
+      color: #000000;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
   </style>
 </head>
 <body>
-  <div id="overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;">
-    <div class="overlay-box" style="background:#fff;padding:20px 40px;border-radius:12px;font-size:22px;font-weight:bold;font-family:'Noto Sans Thai',sans-serif;color:#000;box-shadow:0 4px 16px rgba(0,0,0,0.2);">
+  <div id="overlay">
+    <div class="overlay-box">
       💾 กำลังบันทึกผลการจับรางวัล...
     </div>
   </div>
