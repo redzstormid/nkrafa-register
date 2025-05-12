@@ -42,6 +42,9 @@
     .right-panel {
       flex: 0 0 20%;
     }
+    .column-small { width: 50px; }
+    .column-medium { width: 90px; }
+    .column-wide { width: 160px; }
     .prize-table {
       width: 100%;
       border-collapse: collapse;
@@ -108,6 +111,10 @@
     .btn-freeze { background: #00bcd4; }
     .btn-save { background: #43a047; }
     .btn-next { background: #ab47bc; }
+    .btn-reset { 
+      background: red; 
+      position: absolute;
+    }
     .draw-round {
       background: #e3f2fd;
       padding: 20px;
@@ -183,11 +190,11 @@
   </style>
 </head>
 <body>
-
-  <button class="btn-reset" onclick="resetAll()">
-    <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
-  </button>
-
+  <div class="buttons">
+    <button class="btn-reset" onclick="resetAll()">
+      <i data-lucide="rotate-ccw"></i> รีเซ็ตระบบ
+    </button>
+  </div>
   <header>
     <img src="https://img2.pic.in.th/pic/1ce957ef03dff0be3.png" alt="Logo">
     <h1>ระบบจับรางวัล</h1>
