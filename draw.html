@@ -129,7 +129,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color:navy;
+      color:blue;
     }
     .draw-numbers {
       display: flex;
@@ -288,7 +288,7 @@ async function loadRegistData() {
 
 function updateRemaining() {
   document.getElementById("remaining-info").innerHTML =
-    `<h2 style="text-align:center; background-color:white; height: 60px; color:navy;">คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน</h2>${remaining.join(', ')}`;
+    `<h2 style="text-align:center; background-color:white; color:blue; border-radius: 10px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer;">คงเหลือผู้ลงทะเบียน จำนวน ${remaining.length} คน</h2>${remaining.join(', ')}`;
 }
 
 function renderPrizeTable() {
