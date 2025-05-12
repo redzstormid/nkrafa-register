@@ -191,10 +191,10 @@
       <table class="prize-table">
         <thead>
           <tr>
-            <th class="column-small">รอบ</th>
-            <th class="column-wide">รางวัล</th>
+            <th class="column-small">รอบที่</th>
+            <th class="column-wide">ชื่อรางวัล</th>
             <th class="column-small">จำนวน</th>
-            <th class="column-small">ยืนยัน</th>
+            <th class="column-small">อยู่ในงาน</th>
             <th class="column-medium">ลบ</th>
           </tr>
         </thead>
@@ -279,7 +279,7 @@ function renderPrizeTable() {
   prizeList.forEach((row, i) => {
     tbody.innerHTML += `
       <tr>
-        <td><input value="${row[0]}" onchange="editPrize(${i},0,this.value)"></td>
+        <td>${i + 1}</td>
         <td><input value="${row[1]}" onchange="editPrize(${i},1,this.value)"></td>
         <td><input value="${row[2]}" onchange="editPrize(${i},2,this.value)"></td>
         <td><input type="checkbox" ${row[3] ? 'checked' : ''} onchange="editPrize(${i},3,this.checked)"></td>
@@ -292,7 +292,8 @@ function renderPrizeTable() {
 }
 
 function addPrizeRow() {
-  prizeList.push([currentRound, '', 1, false]);
+  const newRound = prizeList.length + 1;
+  prizeList.push([newRound, '', 1, false]); // [round, prizeName, count, confirm]
   savePrizeList();
 }
 
@@ -304,11 +305,14 @@ function editPrize(i, col, val) {
 function deletePrize(i) {
   if (confirm('ลบรายการนี้?')) {
     prizeList.splice(i, 1);
+    // รีจัดลำดับรอบใหม่
+    prizeList = prizeList.map((row, index) => [index + 1, row[1], row[2], row[3]]);
     savePrizeList();
   }
 }
 
 function savePrizeList() {
+  prizeList = prizeList.map((row, index) => [index + 1, row[1], row[2], row[3]]);
   localStorage.setItem('prizeList', JSON.stringify(prizeList));
   renderPrizeTable();
 }
