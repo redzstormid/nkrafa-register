@@ -361,46 +361,30 @@ function startRandom() {
   const prize = prizeList.find(p => Number(p[0]) === currentRound);
   if (!prize) return;
   const count = Number(prize[2]);
-  const confirmMode = prize[3];
+  drawnNumbers = [];
+
   const box = document.getElementById("number-boxes");
-
-  const confirmedEls = [...box.querySelectorAll('.draw-number.confirmed')];
-  const confirmedNums = confirmedEls.map(el => Number(el.innerText));
-
-  if (confirmMode && box.children.length > 0) {
-    const allDrawn = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
-    const unconfirmed = allDrawn.filter(n => !confirmedNums.includes(n));
-    remaining = remaining.filter(n => !unconfirmed.includes(n));
-  }
-
   box.innerHTML = '';
-  confirmedNums.forEach(num => {
-    const el = document.createElement('div');
-    el.className = 'draw-number confirmed';
-    el.innerText = num;
-    el.onclick = () => el.classList.toggle('confirmed');
-    box.appendChild(el);
-  });
-
-  for (let i = box.children.length; i < count; i++) {
+  for (let i = 0; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'draw-number';
     el.innerText = '🎲';
     box.appendChild(el);
   }
 
-interval = setInterval(() => {
-  const temp = [...remaining];  // สร้างชุดใหม่ทุกครั้ง
-  [...box.children].forEach(el => {
-    if (temp.length === 0) {
-      el.innerText = '❌';
-      return;
-    }
-    const randIndex = Math.floor(Math.random() * temp.length);
-    const rand = temp.splice(randIndex, 1)[0];
-    el.innerText = rand;
-  });
-}, 100);
+  interval = setInterval(() => {
+    const available = [...remaining]; // new clone each interval
+    const used = new Set();
+    [...box.children].forEach(el => {
+      let rand;
+      do {
+        const idx = Math.floor(Math.random() * available.length);
+        rand = available[idx];
+      } while (used.has(rand) && used.size < available.length);
+      used.add(rand);
+      el.innerText = rand || '❌';
+    });
+  }, 100);
 
   setButtonState('freeze');
 }
