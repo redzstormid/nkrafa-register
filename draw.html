@@ -220,7 +220,7 @@
 <body>
   <div id="overlay">
     <div class="overlay-box">
-      🗕️ กำลังบันทึกผลการจับรางวัล...
+      💾 กำลังบันทึกผลการจับรางวัล...
     </div>
   </div>
   <button class="reset-btn" onclick="resetAll()">
@@ -572,7 +572,7 @@ function saveResult() {
 
   showOverlay();
 
-  const url = `${SCRIPT_URL}?saveResult=1&sendFlex=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&callback=${callbackName}`;
+  const url = `${SCRIPT_URL}?saveResult=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&sendFlex=1&callback=${callbackName}`;
   const script = document.createElement('script');
   script.src = url;
   document.body.appendChild(script);
