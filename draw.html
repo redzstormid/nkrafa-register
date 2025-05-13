@@ -62,16 +62,6 @@
     .prize-table th {
       background: #dceeff;
     }
-    .prize-table input[type="text"],
-    .prize-table input[type="number"] {
-      width: 100%;
-      box-sizing: border-box;
-      text-align: center;
-      font-family: 'Noto Sans Thai', sans-serif;
-      font-size: 14px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
     .add-prize-btn {
       margin-top: 10px;
       padding: 10px 12px;
@@ -176,9 +166,6 @@
       color: #0d47a1;
       font-weight: normal;
     }
-    .result-section ol {
-      margin-left: 20px;
-    }
     .reset-btn {
       font-family: 'Noto Sans Thai', sans-serif;
       font-size: 14px;
@@ -233,7 +220,7 @@
 <body>
   <div id="overlay">
     <div class="overlay-box">
-      💾 กำลังบันทึกผลการจับรางวัล...
+      🗕️ กำลังบันทึกผลการจับรางวัล...
     </div>
   </div>
   <button class="reset-btn" onclick="resetAll()">
@@ -246,6 +233,20 @@
 
   <div class="container">
     <div class="left-panel">
+      <div id="group-select" style="margin-left: 30px; margin-bottom: 10px; font-size: 15px;">
+        <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <input type="radio" name="group" value="all" checked> ทั้งหมด
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <input type="radio" name="group" value="rank1"> น.สัญญาบัตร
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+          <input type="radio" name="group" value="rank2"> น.ประทวน
+      </label>
+      <label style="display: flex; align-items: center; gap: 6px;">
+         <input type="radio" name="group" value="rank3"> ลูกจ้าง/พนักงานราชการ
+      </label>
+      </div>
       <table class="prize-table">
         <thead>
           <tr>
@@ -289,6 +290,26 @@ let registData = [];
 let remaining = [];
 let drawnNumbers = [];
 let interval = null;
+let rank1 = [], rank2 = [], rank3 = [];
+let usedNumbers = JSON.parse(localStorage.getItem('usedNumbers') || '[]');
+
+const RANK1_SET = new Set([
+  'พล.อ.อ.', 'พล.อ.อ.หญิง', 'พล.อ.ท.', 'พล.อ.ท.หญิง', 'พล.อ.ต.', 'พล.อ.ต.หญิง',
+  'น.อ.(พ)', 'น.อ.(พ) หญิง', 'น.อ.', 'ว่าที่ น.อ.', 'น.อ.หญิง', 'ว่าที่ น.อ.หญิง',
+  'น.ท.', 'ว่าที่ น.ท.', 'น.ท.หญิง', 'ว่าที่ น.ท.หญิง',
+  'น.ต.', 'ว่าที่ น.ต.', 'น.ต.หญิง', 'ว่าที่ น.ต.หญิง',
+  'ร.อ.', 'ว่าที่ ร.อ.', 'ร.อ.หญิง', 'ว่าที่ ร.อ.หญิง',
+  'ร.ท.', 'ว่าที่ ร.ท.', 'ร.ท.หญิง', 'ว่าที่ ร.ท.หญิง',
+  'ร.ต.', 'ว่าที่ ร.ต.', 'ร.ต.หญิง', 'ว่าที่ ร.ต.หญิง',
+  'กห.ส.', 'กห.ส.(ญ)'
+]);
+const RANK2_SET = new Set([
+  'พ.อ.อ.(พ)', 'พ.อ.อ.(พ) หญิง', 'พ.อ.อ.', 'พ.อ.อ.หญิง',
+  'พ.อ.ท.', 'พ.อ.ท.หญิง', 'พ.อ.ต.', 'พ.อ.ต.หญิง',
+  'จ.อ.', 'จ.อ.หญิง', 'จ.ท.', 'จ.ท.หญิง', 'จ.ต.', 'จ.ต.หญิง',
+  'กห.ป.', 'กห.ป.(ญ)'
+]);
+const RANK3_SET = new Set(['นาย', 'นาง', 'น.ส.']);
 
 // 🔽 เพิ่มไว้บนสุดใน <script>
 function showOverlay() {
@@ -300,6 +321,23 @@ function hideOverlay() {
 
 function saveRemainingToStorage() {
   localStorage.setItem("remaining", JSON.stringify(remaining));
+}
+
+function filterRanks() {
+  rank1 = registData.filter(p => RANK1_SET.has(p.rank));
+  rank2 = registData.filter(p => RANK2_SET.has(p.rank));
+  rank3 = registData.filter(p => RANK3_SET.has(p.rank));
+}
+
+function setRemainingFromGroup(group) {
+  let base = [];
+  if (group === 'rank1') base = rank1;
+  else if (group === 'rank2') base = rank2;
+  else if (group === 'rank3') base = rank3;
+  else base = [...rank1, ...rank2, ...rank3];
+  remaining = base.map(p => p.index).filter(n => !usedNumbers.includes(n));
+  updateRemaining();
+  saveRemainingToStorage();
 }
 
 const buttons = {
@@ -332,11 +370,25 @@ function setButtonState(state) {
 
 async function loadRegistData() {
   const res = await fetch(`${SCRIPT_URL}?getRegistList=1`);
-  registData = await res.json();
-  remaining = registData.map((_, i) => i + 1);
-  updateRemaining();
-  saveRemainingToStorage();
+  const raw = await res.json();
+  registData = raw.map((row, index) => ({
+    index: index + 1,
+    rtafId: row[2],       // แก้จาก [4]
+    rank: row[3],         // แก้จาก [5]
+    name: row[4],         // แก้จาก [6]
+    position: row[5],     // แก้จาก [7]
+    unit: row[6]          // แก้จาก [8]
+  }));
+  filterRanks();
+  setRemainingFromGroup('all');
   setButtonState('draw');
+  console.log('✔️ RAW DATA:', raw);
+  console.log('✔️ RegistData:', registData);
+  console.log('✔️ Rank1:', rank1.map(p => p.rank));
+  console.log('✔️ Rank2:', rank2.map(p => p.rank));
+  console.log('✔️ Rank3:', rank3.map(p => p.rank));
+  console.log('✔️ Remaining:', remaining);
+  console.log('🔍 RANKS FOUND:', Array.from(new Set(registData.map(p => p.rank))).sort());
 }
 
 function updateRemaining() {
@@ -473,14 +525,21 @@ function stopRandom() {
   });
 
   if (confirmMode) {
+    // ✅ ตัดออกจาก remaining
     remaining = remaining.filter(n => !newDraw.includes(n));
     updateRemaining();
+
+    // ✅ บันทึกเข้า usedNumbers ทันที (ไม่ว่าเลือกหรือไม่เลือก)
+    usedNumbers = [...usedNumbers, ...newDraw];
+    localStorage.setItem('usedNumbers', JSON.stringify(usedNumbers));
+
     saveRemainingToStorage();
   }
 
   drawnNumbers = [...box.querySelectorAll('.draw-number')].map(el => Number(el.innerText));
   setButtonState('draw');
 }
+
 
 // 🔁 แก้ฟังก์ชัน saveResult() ให้แสดง overlay ระหว่างบันทึก
 function saveResult() {
@@ -495,6 +554,10 @@ function saveResult() {
     return;
   }
 
+  // ✅ เพิ่มบันทึกเลขที่ใช้แล้ว
+  usedNumbers = [...usedNumbers, ...toSave];
+  localStorage.setItem('usedNumbers', JSON.stringify(usedNumbers));
+
   const callbackName = `jsonpCallback_${Date.now()}`;
   window[callbackName] = function(response) {
     hideOverlay();
@@ -507,13 +570,14 @@ function saveResult() {
     delete window[callbackName];
   };
 
-  showOverlay(); // ✅ แสดง overlay ก่อนส่ง
+  showOverlay();
 
   const url = `${SCRIPT_URL}?saveResult=1&round=${encodeURIComponent(prize[0])}&prize=${encodeURIComponent(prize[1])}&numbers=${toSave.join(',')}&callback=${callbackName}`;
   const script = document.createElement('script');
   script.src = url;
   document.body.appendChild(script);
 }
+
 
 function renderWinners() {
   const callbackName = `renderCallback_${Date.now()}`;
@@ -558,7 +622,11 @@ function nextRound() {
 
 function resetAll() {
   if (confirm("⚠️ ต้องการรีเซ็ตระบบจับรางวัลทั้งหมดใช่หรือไม่?")) {
+    // ✅ เคลียร์ localStorage ทั้งหมดที่เกี่ยวข้อง
     localStorage.removeItem('prizeList');
+    localStorage.removeItem('usedNumbers');
+    localStorage.removeItem('remaining');
+    localStorage.removeItem('drawnNumbers'); // ถ้ามีใช้
 
     const callbackName = `resetCallback_${Date.now()}`;
     window[callbackName] = function(response) {
@@ -587,10 +655,14 @@ window.addEventListener('DOMContentLoaded', () => {
   const container = document.querySelector('.container');
   container.style.display = 'flex';
   container.style.flexWrap = 'nowrap';
-
   document.querySelector('.left-panel').style.flex = '0 0 20%';
   document.querySelector('.center-panel').style.flex = '1';
   document.querySelector('.right-panel').style.flex = '0 0 20%';
+
+  // ✅ ตัวเลือกกลุ่ม
+  document.querySelectorAll('input[name="group"]').forEach(radio => {
+    radio.onchange = () => setRemainingFromGroup(radio.value);
+  });
 });
 </script>
 
