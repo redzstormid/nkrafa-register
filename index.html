@@ -5,44 +5,75 @@
   <title>เมนูหลัก - NKRAFA Register</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Noto Sans Thai', sans-serif;
       background-color: #f0f4f8;
-      padding: 40px;
+      margin: 0;
+      padding: 40px 20px;
       text-align: center;
     }
     h1 {
       color: #0d47a1;
-      margin-bottom: 40px;
+      margin-bottom: 30px;
+      font-size: 2.2em;
     }
-    .link-list {
-      display: inline-block;
-      text-align: left;
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
     }
-    .link-list a {
-      display: block;
-      margin: 12px 0;
-      font-size: 1.5em;
-      color: #1565c0;
+    .card {
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      width: 280px;
+      padding: 24px 16px;
+      text-align: center;
       text-decoration: none;
-      padding: 10px 16px;
-      background: #e3f2fd;
-      border-radius: 8px;
-      transition: background 0.2s;
+      color: #1565c0;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .link-list a:hover {
-      background: #bbdefb;
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+    .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+    .title {
+      font-size: 1.3em;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <h1>📋 เมนูหลัก - ระบบลงทะเบียน NKRAFA</h1>
-  <div class="link-list">
-    <a href="superadmin.html" target="_blank">🛡️ การจัดการ SuperAdmin</a>
-    <a href="admin.html" target="_blank">🧑‍💼 การจัดการ Admin</a>
-    <a href="scan.html" target="_blank">📷 ระบบสแกนลงทะเบียน</a>
-    <a href="summary.html" target="_blank">📊 ระบบแสดงผลจำนวนผู้เข้าร่วมงาน</a>
-    <a href="draw.html" target="_blank">🎁 ระบบจับรางวัล</a>
+  <div class="card-container">
+    <a href="superadmin.html" target="_blank" class="card">
+      <div class="icon">🛡️</div>
+      <div class="title">การจัดการ SuperAdmin</div>
+    </a>
+    <a href="admin.html" target="_blank" class="card">
+      <div class="icon">🧑‍💼</div>
+      <div class="title">การจัดการ Admin</div>
+    </a>
+    <a href="scan.html" target="_blank" class="card">
+      <div class="icon">📷</div>
+      <div class="title">ระบบสแกนลงทะเบียน</div>
+    </a>
+    <a href="summary.html" target="_blank" class="card">
+      <div class="icon">📊</div>
+      <div class="title">แสดงผลจำนวนผู้เข้าร่วมงาน</div>
+    </a>
+    <a href="draw.html" target="_blank" class="card">
+      <div class="icon">🎁</div>
+      <div class="title">ระบบจับรางวัล</div>
+    </a>
   </div>
 </body>
 </html>
