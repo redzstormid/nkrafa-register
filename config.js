@@ -1,4 +1,4 @@
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwHID4b2MnL9xPSzikgnkD0MZklDgniTdYE561bsY6CuNhjLWmIsX2ISbvC3AelBHweyw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxLQ5akXa5NOD9ZgWHLhLl9b0bH5rtdYhuzxrtBTTnGjagik23aT5ZawCtvvu1lDyGdWw/exec';
 const LIFF_ID_QR = '2007226288-k77xbmX7';
 const LIFF_ID_SCAN = '2007226288-Qj0NDKY0';
 const LIFF_ID_SUPERADMIN = '2007226288-bNnjgPkn';
